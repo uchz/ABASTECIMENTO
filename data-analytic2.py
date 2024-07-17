@@ -141,9 +141,6 @@ with tab3:
     # Título da Aplicação
     st.title('Acompanhamento da Operação')
 
-    st.sidebar.title("Menu")
-
-
     df = pd.read_excel('Expedicao_de_Mercadorias.xls', header=2)
 
     colunas = ['Nro. Nota', 'Conferente', 'Enviado p/ Doca', 'Descrição (Área de Conferência)', 'Nro. Sep.', 'Nro. Único',
