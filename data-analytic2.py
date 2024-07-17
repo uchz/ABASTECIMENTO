@@ -40,6 +40,7 @@ with tab1:
     
     # Carga e Processamento dos Dados de Desempenho dos Operadores
     df_desempenho = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
+    
 
     # Definindo fuso
     fuso_horario = 'America/Sao_Paulo'
@@ -158,13 +159,14 @@ with tab2:
 
     st.write(status)
 
-with tab3:
+    df = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
+
     df = df[df['Tipo '] == 'SEPARAÇÃO']
 
-def validar_e_substituir(valor):
-    if valor == 'SEP VAREJO 01 - (PICKING)' or valor == 'SEP CONFINADO' or valor == 'SEP VAREJO CONEXOES' or valor == 'CONFERENCIA CONFINADO' or valor == 'CONFERENCIA VAREJO 1' or valor == 'CONF VOLUMOSO' or valor == 'SEP TUBOS' or valor == 'SEP AUDITORIO FL - (PICKING)':
-        return valor
-    else:
-        return 'SEP VOLUMOSO'
+    def validar_e_substituir(valor):
+        if valor == 'SEP VAREJO 01 - (PICKING)' or valor == 'SEP CONFINADO' or valor == 'SEP VAREJO CONEXOES' or valor == 'CONFERENCIA CONFINADO' or valor == 'CONFERENCIA VAREJO 1' or valor == 'CONF VOLUMOSO' or valor == 'SEP TUBOS' or valor == 'SEP AUDITORIO FL - (PICKING)':
+            return valor
+        else:
+            return 'SEP VOLUMOSO'
 
-df['Area Separação'] = df['Area Separação'].apply(validar_e_substituir)
+    df['Area Separação'] = df['Area Separação'].apply(validar_e_substituir)
