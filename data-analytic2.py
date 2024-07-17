@@ -34,7 +34,7 @@ with tab1:
     st.subheader('Abastecimentos por Área')
     st.write(df_abastecimento.groupby('AREA DE SEPA ENDEREçO DESTINO')['CODPROD'].count())
 
-with tab2:
+
     st.header("Desempenho dos Operadores")
     
     # Carga e Processamento dos Dados de Desempenho dos Operadores
@@ -140,8 +140,6 @@ with tab2:
 with tab3:
     # Título da Aplicação
     st.title('Acompanhamento da Operação')
-
-    st.sidebar.title("Menu")
 
 
     df = pd.read_excel('Expedicao_de_Mercadorias.xls', header=2)
