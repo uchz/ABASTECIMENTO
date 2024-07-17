@@ -5,7 +5,6 @@ import pytz
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-st.sidebar.title("Menu")
 
 # Título da Aplicação
 st.title('Análise de Abastecimentos e Desempenho dos Operadores')
@@ -31,8 +30,10 @@ with tab1:
 
     df_abastecimento['AREA DE SEPA ENDEREçO DESTINO'] = df_abastecimento['AREA DE SEPA ENDEREçO DESTINO'].apply(validar_e_substituir)
 
+    df_abastecimento.rename(columns={"AREA DE SEPA ENDEREçO DESTINO" : "Area", 'CODPROD' : 'Qtd Códigos'}, inplace=True)
+
     st.subheader('Abastecimentos por Área')
-    st.write(df_abastecimento.groupby('AREA DE SEPA ENDEREçO DESTINO')['CODPROD'].count())
+    st.dataframe(df_abastecimento.groupby('Area')['Qtd Códigos'].count())
 
 
     st.header("Desempenho dos Operadores")
@@ -141,19 +142,29 @@ with tab2:
     # Título da Aplicação
     st.title('Acompanhamento da Operação')
 
-    df = pd.read_excel('Expedicao_de_Mercadorias.xls', header=2)
+    expedicao = pd.read_excel('Expedicao_de_Mercadorias.xls', header=2)
 
     colunas = ['Nro. Nota', 'Conferente', 'Enviado p/ Doca', 'Descrição (Área de Conferência)', 'Nro. Sep.', 'Nro. Único',
             'Descrição (Doca do WMS)', 'Cód. Doca', 'Peso Bruto', 'M3 Bruto', 'Área', 'Cód. Emp OC', 'Cód. Área Sep', 'Triagem Realizada', 'Cod. Conferente' ]
 
-    df.drop(columns=colunas, inplace=True)
+    expedicao.drop(columns=colunas, inplace=True)
 
-    df = df[df['Situação'] == 'Enviado para separação']
-    df['O.C'] = df['O.C'].astype(int)
-    df['O.C'] = df['O.C'].astype(str)
+    expedicao = df[df['Situação'] == 'Enviado para separação']
+    expedicao['O.C'] = expedicao['O.C'].astype(int)
+    expedicao['O.C'] = expedicao['O.C'].astype(str)
 
-    status = df.groupby('Descrição (Area de Separacao)').agg(Qtd_Ocs = ('O.C', 'count'), OC = ('O.C', 'min')).reset_index()
+    status = expedicao.groupby('Descrição (Area de Separacao)').agg(Qtd_Ocs = ('O.C', 'count'), OC = ('O.C', 'min')).reset_index()
 
 
     st.write(status)
 
+with tab3:
+    df = df[df['Tipo '] == 'SEPARAÇÃO']
+
+def validar_e_substituir(valor):
+    if valor == 'SEP VAREJO 01 - (PICKING)' or valor == 'SEP CONFINADO' or valor == 'SEP VAREJO CONEXOES' or valor == 'CONFERENCIA CONFINADO' or valor == 'CONFERENCIA VAREJO 1' or valor == 'CONF VOLUMOSO' or valor == 'SEP TUBOS' or valor == 'SEP AUDITORIO FL - (PICKING)':
+        return valor
+    else:
+        return 'SEP VOLUMOSO'
+
+df['Area Separação'] = df['Area Separação'].apply(validar_e_substituir)
