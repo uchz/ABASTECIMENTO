@@ -138,6 +138,25 @@ with tab2:
     st.pyplot(plt)
 
 with tab3:
-    st.header("Separação")
-    st.write("Conteúdo de separação aqui...")
+    # Título da Aplicação
+    st.title('Acompanhamento da Operação')
+
+    st.sidebar.title("Menu")
+
+
+    df = pd.read_excel('Expedicao_de_Mercadorias.xls', header=2)
+
+    colunas = ['Nro. Nota', 'Conferente', 'Enviado p/ Doca', 'Descrição (Área de Conferência)', 'Nro. Sep.', 'Nro. Único',
+            'Descrição (Doca do WMS)', 'Cód. Doca', 'Peso Bruto', 'M3 Bruto', 'Área', 'Cód. Emp OC', 'Cód. Área Sep', 'Triagem Realizada', 'Cod. Conferente' ]
+
+    df.drop(columns=colunas, inplace=True)
+
+    df = df[df['Situação'] == 'Enviado para separação']
+    df['O.C'] = df['O.C'].astype(int)
+    df['O.C'] = df['O.C'].astype(str)
+
+    status = df.groupby('Descrição (Area de Separacao)').agg(Qtd_Ocs = ('O.C', 'count'), OC = ('O.C', 'min')).reset_index()
+
+
+    st.write(status)
 
