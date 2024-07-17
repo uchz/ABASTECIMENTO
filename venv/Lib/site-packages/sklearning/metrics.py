@@ -1,0 +1,28 @@
+from sklearn.metrics import *
+from sklearn.metrics.pairwise import *
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+from statsmodels.api import add_constant, OLS
+
+
+
+def rootMeanSquaredError(y_true, y_pred, sample_weight=None, multioutput='uniform_average', squared=True):
+    return np.sqrt(
+        mean_squared_error(y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput, squared=squared))
+
+
+def regressorSummary(X, y):
+    regressor_OLS = OLS(endog=y, exog=X).fit()
+    return regressor_OLS.summary()
+
+
+def statsValue(X, y):
+    X2 = add_constant(X)
+    est = OLS(y, X2)
+    est2 = est.fit()
+    print("pvalues\n", est2.pvalues)
+    print("tvalues\n", est2.tvalues)
+    print("rsquared\n", est2.rsquared)
+    print("rsquared_adj\n", est2.rsquared_adj)
+    return
