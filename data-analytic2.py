@@ -11,7 +11,7 @@ st.sidebar.title("Menu")
 st.title('Análise de Abastecimentos e Desempenho dos Operadores')
 
 # Criação das abas
-tab1, tab2, tab3 = st.tabs(["Abastecimento", "Desempenho dos Operadores", "Separação"])
+tab1, tab2, tab3 = st.tabs(["Abastecimento", "Separação Volumoso", "Separação"])
 
 with tab1:
     st.header("Abastecimentos")
@@ -137,7 +137,7 @@ with tab2:
     plt.tight_layout()
     st.pyplot(plt)
 
-with tab3:
+with tab2:
     # Título da Aplicação
     st.title('Acompanhamento da Operação')
 
