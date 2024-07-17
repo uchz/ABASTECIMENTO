@@ -34,7 +34,7 @@ with tab1:
     st.subheader('Abastecimentos por Área')
     st.write(df_abastecimento.groupby('AREA DE SEPA ENDEREçO DESTINO')['CODPROD'].count())
 
-with tab2:
+
     st.header("Desempenho dos Operadores")
     
     # Carga e Processamento dos Dados de Desempenho dos Operadores
