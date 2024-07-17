@@ -33,7 +33,7 @@ with tab1:
     df_abastecimento.rename(columns={"AREA DE SEPA ENDEREçO DESTINO" : "Area", 'CODPROD' : 'Qtd Códigos'}, inplace=True)
 
     st.subheader('Abastecimentos por Área')
-    st.dataframe(df_abastecimento.groupby('Area')['Qtd Códigos'].count())
+    st.write(df_abastecimento.groupby('Area')['Qtd Códigos'].count(), height=200)
 
 
     st.header("Desempenho dos Operadores")
@@ -149,7 +149,7 @@ with tab2:
 
     expedicao.drop(columns=colunas, inplace=True)
 
-    expedicao = df[df['Situação'] == 'Enviado para separação']
+    expedicao = expedicao[expedicao['Situação'] == 'Enviado para separação']
     expedicao['O.C'] = expedicao['O.C'].astype(int)
     expedicao['O.C'] = expedicao['O.C'].astype(str)
 
