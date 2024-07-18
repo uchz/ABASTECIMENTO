@@ -24,7 +24,7 @@ with tab1:
 
     @st.cache_data
     def validar_e_substituir(valor):
-        if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP CONEXOES']:
+        if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
             return valor
         else:
             return 'SEP VOLUMOSO'
@@ -34,7 +34,7 @@ with tab1:
     df_abastecimento.rename(columns={"AREA DE SEPA ENDEREçO DESTINO" : "Area", 'CODPROD' : 'Qtd Códigos'}, inplace=True)
 
     st.subheader('Abastecimentos por Área')
-    st.write(df_abastecimento.groupby('Area')['Qtd Códigos'].count(), height=200)
+    st.write(df_abastecimento.groupby('Area')['Qtd Códigos'].count())
 
 
     st.header("Desempenho dos Operadores")
@@ -163,93 +163,94 @@ with tab2:
     df = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
 
     #Função para trazer data e hora atualizada
-def data ():
-  data_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%d-%m-%Y')
-  hora_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%H:%M')
+    def data ():
 
-  return data_atual, hora_atual
+        data_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%d-%m-%Y')
+        hora_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%H:%M')
 
-data, hora = data()
+        return data_atual, hora_atual
 
-df['Dt./Hora Inicial'] = pd.to_datetime( df['Dt./Hora Inicial'], format='%d/%m/%Y %H:%M:%S')
+    data, hora = data()
 
-df['Hora'] = df['Dt./Hora Inicial'].dt.hour
+    df['Dt./Hora Inicial'] = pd.to_datetime( df['Dt./Hora Inicial'], format='%d/%m/%Y %H:%M:%S')
 
-df['Hora'] = pd.to_datetime(df['Hora'], format='%H').dt.time
+    df['Hora'] = df['Dt./Hora Inicial'].dt.hour
 
-df = df[df['Tipo '] == 'SEPARAÇÃO']
+    df['Hora'] = pd.to_datetime(df['Hora'], format='%H').dt.time
 
-def validar_e_substituir(valor):
-    if valor == 'SEP VAREJO 01 - (PICKING)' or valor == 'SEP CONFINADO' or valor == 'SEP VAREJO CONEXOES' or valor == 'CONFERENCIA CONFINADO' or valor == 'CONFERENCIA VAREJO 1' or valor == 'CONF VOLUMOSO' or valor == 'SEP TUBOS' or valor == 'SEP AUDITORIO FL - (PICKING)':
-           return valor
-    else:
-        return 'SEP VOLUMOSO'
-            
+    df = df[df['Tipo '] == 'SEPARAÇÃO']
 
-    
-       
-       
-       
+    def validar_e_substituir(valor):
+        if valor == 'SEP VAREJO 01 - (PICKING)' or valor == 'SEP CONFINADO' or valor == 'SEP VAREJO CONEXOES' or valor == 'CONFERENCIA CONFINADO' or valor == 'CONFERENCIA VAREJO 1' or valor == 'CONF VOLUMOSO' or valor == 'SEP TUBOS' or valor == 'SEP AUDITORIO FL - (PICKING)':
+            return valor
+        else:
+            return 'SEP VOLUMOSO'
+                
 
-df['Area Separação'] = df['Area Separação'].apply(validar_e_substituir)
+        
+        
+        
+        
+
+    df['Area Separação'] = df['Area Separação'].apply(validar_e_substituir)
 
 
-st.subheader('Produtividade Separação')
+    st.subheader('Produtividade Separação')
 
-    #Filtrando apenas por Separação do varejo
-area_var = ['SEP VOLUMOSO' ]
+        #Filtrando apenas por Separação do varejo
+    area_var = ['SEP VOLUMOSO' ]
 
-varejo = df[df['Area Separação'].isin(area_var)]
+    varejo = df[df['Area Separação'].isin(area_var)]
 
-#Produtividade Varejo. Ordenado por apanhas
-prod_varejo = varejo[['Usuário','Qtde Tarefas']].groupby('Usuário').agg(Apanhas=('Qtde Tarefas', 'count'), Pedidos=('Qtde Tarefas', 'nunique'))
+    #Produtividade Varejo. Ordenado por apanhas
+    prod_varejo = varejo[['Usuário','Qtde Tarefas']].groupby('Usuário').agg(Apanhas=('Qtde Tarefas', 'count'), Pedidos=('Qtde Tarefas', 'nunique'))
 
-prod_varejo = prod_varejo.sort_values(by=('Apanhas'), ascending=False)
+    prod_varejo = prod_varejo.sort_values(by=('Apanhas'), ascending=False)
 
-data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora},index=['Data'], columns=prod_varejo.columns)
+    data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora},index=['Data'], columns=prod_varejo.columns)
 
-#Somando o total de apanhas e pedidos
-total = pd.DataFrame({'Apanhas': prod_varejo['Apanhas'].sum(), 'Pedidos': prod_varejo['Pedidos'].sum()}, index=['Apanhas Feitas'])
-#apanhas_totais = prod_varejo.loc[prod_varejo['Usuário'] != 'Total', 'Apanhas'].sum()
-#total_apanhas = prod_varejo.loc['Total', 'Apanhas']
-#prod_varejo['Representividade'] = prod_varejo['Apanhas'] / total_apanhas
+    #Somando o total de apanhas e pedidos
+    total = pd.DataFrame({'Apanhas': prod_varejo['Apanhas'].sum(), 'Pedidos': prod_varejo['Pedidos'].sum()}, index=['Apanhas Feitas'])
+    #apanhas_totais = prod_varejo.loc[prod_varejo['Usuário'] != 'Total', 'Apanhas'].sum()
+    #total_apanhas = prod_varejo.loc['Total', 'Apanhas']
+    #prod_varejo['Representividade'] = prod_varejo['Apanhas'] / total_apanhas
 
-data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora },index=['Data'], columns=prod_varejo.columns)
+    data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora },index=['Data'], columns=prod_varejo.columns)
 
-#prod_varejo = pd.merge(prod_varejo, on='Usuário', how='left')
-prod_varejo.fillna(0, inplace=True)
-# Concatenar as linhas ao DataFrame original
-prod_varejo = pd.concat([prod_varejo, total, data_atual])
+    #prod_varejo = pd.merge(prod_varejo, on='Usuário', how='left')
+    prod_varejo.fillna(0, inplace=True)
+    # Concatenar as linhas ao DataFrame original
+    prod_varejo = pd.concat([prod_varejo, total, data_atual])
 
-#prod_varejo.fillna('', inplace=True)
+    #prod_varejo.fillna('', inplace=True)
 
-#Tabela para impressão/visualização
-prod_varejo['Usuário'] = prod_varejo.index
+    #Tabela para impressão/visualização
+    prod_varejo['Usuário'] = prod_varejo.index
 
-# Criar figura e eixos
-fig, ax = plt.subplots(figsize=(10, 4))
+    # Criar figura e eixos
+    fig2, ax = plt.subplots(figsize=(10, 4))
 
-# Esconder eixos
-ax.axis('off')
+    # Esconder eixos
+    ax.axis('off')
 
-# Adicionar tabela e personalizar estilo
-tab = table(ax, prod_varejo[['Apanhas', 'Pedidos']], loc='center', cellLoc='center', colWidths=[0.15, 0.15, 0.15, 0.15])
+    # Adicionar tabela e personalizar estilo
+    tab = table(ax, prod_varejo[['Apanhas', 'Pedidos']], loc='center', cellLoc='center', colWidths=[0.15, 0.15, 0.15, 0.15])
 
-# Adicionar título
+    # Adicionar título
 
-# Adicionar cores alternadas às células
-colors = ['white', 'lightgray']
-for i, key in enumerate(tab.get_celld().keys()):
-    cell = tab.get_celld()[key]
-    if key[0] == 0:  # Ignorar a linha de cabeçalho
-        continue
-    cell.set_facecolor(colors[i % len(colors)])
+    # Adicionar cores alternadas às células
+    colors = ['white', 'lightgray']
+    for i, key in enumerate(tab.get_celld().keys()):
+        cell = tab.get_celld()[key]
+        if key[0] == 0:  # Ignorar a linha de cabeçalho
+            continue
+        cell.set_facecolor(colors[i % len(colors)])
 
-# Adicionar estilo aos nomes dos usuários
-tab.auto_set_font_size(False)
-tab.set_fontsize(10)
-tab.scale(1.2, 1.2)
+    # Adicionar estilo aos nomes dos usuários
+    tab.auto_set_font_size(False)
+    tab.set_fontsize(10)
+    tab.scale(1.2, 1.2)
 
-# Salvar a imagem
-#plt.savefig('Produtividade Varejo.png', bbox_inches='tight', pad_inches=0.5)
-st.pyplot(fig)
+    # Salvar a imagem
+    #plt.savefig('Produtividade Varejo.png', bbox_inches='tight', pad_inches=0.5)
+    st.pyplot(fig2)
