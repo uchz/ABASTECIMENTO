@@ -59,7 +59,7 @@ with tab1:
     df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.time
 
     tipo = ['PREVENTIVO', 'CORRETIVO', 'TRANSFERÊNCIA']
-    empilhadores = ['JOSIMAR.DUTRA', 'CROI.MOURA', 'INOEL.GUIMARAES', 'ERICK.REIS', 'CLAUDIO.MARINS']
+    empilhadores = ['JOSIMAR.DUTRA', 'CROI.MOURA', 'INOEL.GUIMARAES', 'ERICK.REIS', 'CLAUDIO.MARINS', 'LUIS.HENRIQUE']
 
     df_desempenho = df_desempenho[df_desempenho['Tipo '].isin(tipo)]
     df_desempenho = df_desempenho[df_desempenho['Usuário'].isin(empilhadores)]
@@ -144,6 +144,8 @@ with tab2:
     # Título da Aplicação
     st.title('Acompanhamento da Operação Volumoso')
 
+    st.subheader('Quantidade de Pedidos Pendentes por Rua')
+
     expedicao = pd.read_excel('Expedicao_de_Mercadorias.xls', header=2)
 
     colunas = ['Nro. Nota', 'Conferente', 'Enviado p/ Doca', 'Descrição (Área de Conferência)', 'Nro. Sep.', 'Nro. Único',
@@ -226,6 +228,10 @@ with tab2:
 
     #Tabela para impressão/visualização
     prod_varejo['Usuário'] = prod_varejo.index
+    prod_varejo.drop(columns="Usuário", inplace=True)
+    prod_varejo.index.name = "Usuário"
+    
+    st.write(prod_varejo, width=1000, height=500)
 
     # Criar figura e eixos
     fig2, ax = plt.subplots(figsize=(10, 4))
@@ -253,4 +259,55 @@ with tab2:
 
     # Salvar a imagem
     #plt.savefig('Produtividade Varejo.png', bbox_inches='tight', pad_inches=0.5)
-    st.pyplot(fig2)
+    #st.pyplot(fig2)
+
+    # Função para ajustar os horários para ordenação correta
+    def ajustar_horario(horario):
+        hora = pd.to_datetime(horario, format='%H:%M').time()
+        if hora >= pd.to_datetime('19:00', format='%H:%M').time():
+            return pd.to_datetime(horario, format='%H:%M') - pd.DateOffset(hours=24)
+        else:
+            return pd.to_datetime(horario, format='%H:%M')
+
+    # Calculando as tarefas por hora como você já fez
+    tarefas_por_hora = varejo.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
+    tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
+    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
+
+    # Criar coluna de ordenação temporária
+    tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(ajustar_horario)
+
+    # Ordenar o DataFrame usando a coluna de ordenação
+    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Ordenacao']).drop('Ordenacao', axis=1)
+
+    # Pivotando os dados
+    tarefas_pivot = tarefas_por_hora.pivot_table(index='Usuário', columns='Hora', values='Qtde Tarefas', fill_value=0)
+
+    # Ordenando as colunas corretamente
+    tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=ajustar_horario))
+
+    # Calculando o total por hora e adicionando uma linha de total
+    sum_values = tarefas_pivot.sum()
+    tarefas_pivot.loc['Total P/ Hora'] = sum_values
+
+    # Convertendo os valores para inteiros
+    tarefas_pivot = tarefas_pivot.astype(int)
+
+    # Definindo funções para aplicar cores com base em condições
+    def apply_color(val):
+        color = 'green' if val >= 40 else 'red'
+        return f'background-color: {color}; color: white'
+
+    def apply_color2(valor):
+        color = 'green' if valor > 750 else 'red'
+        return f'background-color: {color}; color: white'
+
+    # Adicionando a coluna de total
+    tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
+
+    # Aplicando estilo de cor à tabela dinâmica
+    tarefas_pivot_styled = tarefas_pivot.style.applymap(apply_color)
+
+    # Exibindo a tabela estilizada no Streamlit
+    st.write("Tarefas por Hora:")
+    st.dataframe(tarefas_pivot_styled)
