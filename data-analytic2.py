@@ -8,7 +8,7 @@ from pandas.plotting import table
 
 
 # Título da Aplicação
-st.title('Análise de Abastecimentos e Desempenho dos Operadores')
+st.title('Acompanhamento Operação Noturno')
 
 # Criação das abas
 tab1, tab2, tab3 = st.tabs(["Abastecimento", "Separação Volumoso", "Separação"])
