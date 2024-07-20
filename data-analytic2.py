@@ -416,6 +416,8 @@ with tab3:
     # Usando Streamlit para exibir o gráfico
     st.pyplot(fig)
 
+    
+
 
 
  
