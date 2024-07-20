@@ -11,7 +11,7 @@ from pandas.plotting import table
 st.title('Acompanhamento Operação Noturno')
 
 # Criação das abas
-tab1, tab2, tab3 = st.tabs(["Abastecimento", "Separação Volumoso", "Separação"])
+tab1, tab2, tab3 = st.tabs(["Abastecimento", "Separação Volumoso", "Separação Varejo"])
 
 with tab1:
     st.header("Abastecimentos")
@@ -183,7 +183,7 @@ with tab2:
     df = df[df['Tipo '] == 'SEPARAÇÃO']
 
     def validar_e_substituir(valor):
-        if valor == 'SEP VAREJO 01 - (PICKING)' or valor == 'SEP CONFINADO' or valor == 'SEP VAREJO CONEXOES' or valor == 'CONFERENCIA CONFINADO' or valor == 'CONFERENCIA VAREJO 1' or valor == 'CONF VOLUMOSO' or valor == 'SEP TUBOS' or valor == 'SEP AUDITORIO FL - (PICKING)':
+        if valor == 'SEP VAREJO 01 - (PICKING)' or valor == 'SEP CONFINADO' or valor == 'SEP VAREJO CONEXOES' or valor == 'CONFERENCIA CONFINADO' or valor == 'CONFERENCIA VAREJO 1' or valor == 'CONF VOLUMOSO' or valor == 'SEP TUBOS' or valor == 'SEP FORA DE LINHA RUA 36':
             return valor
         else:
             return 'SEP VOLUMOSO'
@@ -202,64 +202,33 @@ with tab2:
         #Filtrando apenas por Separação do varejo
     area_var = ['SEP VOLUMOSO' ]
 
-    varejo = df[df['Area Separação'].isin(area_var)]
+    volumoso = df[df['Area Separação'].isin(area_var)]
 
     #Produtividade Varejo. Ordenado por apanhas
-    prod_varejo = varejo[['Usuário','Qtde Tarefas']].groupby('Usuário').agg(Apanhas=('Qtde Tarefas', 'count'), Pedidos=('Qtde Tarefas', 'nunique'))
+    prod_volumoso = volumoso[['Usuário','Qtde Tarefas']].groupby('Usuário').agg(Apanhas=('Qtde Tarefas', 'count'), Pedidos=('Qtde Tarefas', 'nunique'))
 
-    prod_varejo = prod_varejo.sort_values(by=('Apanhas'), ascending=False)
+    prod_volumoso = prod_volumoso.sort_values(by=('Apanhas'), ascending=False)
 
-    data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora},index=['Data'], columns=prod_varejo.columns)
+    data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora},index=['Data'], columns=prod_volumoso.columns)
 
     #Somando o total de apanhas e pedidos
-    total = pd.DataFrame({'Apanhas': prod_varejo['Apanhas'].sum(), 'Pedidos': prod_varejo['Pedidos'].sum()}, index=['Apanhas Feitas'])
-    #apanhas_totais = prod_varejo.loc[prod_varejo['Usuário'] != 'Total', 'Apanhas'].sum()
-    #total_apanhas = prod_varejo.loc['Total', 'Apanhas']
-    #prod_varejo['Representividade'] = prod_varejo['Apanhas'] / total_apanhas
+    total = pd.DataFrame({'Apanhas': prod_volumoso['Apanhas'].sum(), 'Pedidos': prod_volumoso['Pedidos'].sum()}, index=['Apanhas Feitas'])
 
-    data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora },index=['Data'], columns=prod_varejo.columns)
+    data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora },index=['Data'], columns=prod_volumoso.columns)
 
     #prod_varejo = pd.merge(prod_varejo, on='Usuário', how='left')
-    prod_varejo.fillna(0, inplace=True)
+    prod_volumoso.fillna(0, inplace=True)
     # Concatenar as linhas ao DataFrame original
-    prod_varejo = pd.concat([prod_varejo, total, data_atual])
+    prod_volumoso = pd.concat([prod_volumoso, total, data_atual])
 
     #prod_varejo.fillna('', inplace=True)
 
     #Tabela para impressão/visualização
-    prod_varejo['Usuário'] = prod_varejo.index
-    prod_varejo.drop(columns="Usuário", inplace=True)
-    prod_varejo.index.name = "Usuário"
+    prod_volumoso['Usuário'] = prod_volumoso.index
+    prod_volumoso.drop(columns="Usuário", inplace=True)
+    prod_volumoso.index.name = "Usuário"
     
-    st.write(prod_varejo, width=1000, height=500)
-
-    # Criar figura e eixos
-    fig2, ax = plt.subplots(figsize=(10, 4))
-
-    # Esconder eixos
-    ax.axis('off')
-
-    # Adicionar tabela e personalizar estilo
-    tab = table(ax, prod_varejo[['Apanhas', 'Pedidos']], loc='center', cellLoc='center', colWidths=[0.15, 0.15, 0.15, 0.15])
-
-    # Adicionar título
-
-    # Adicionar cores alternadas às células
-    colors = ['white', 'lightgray']
-    for i, key in enumerate(tab.get_celld().keys()):
-        cell = tab.get_celld()[key]
-        if key[0] == 0:  # Ignorar a linha de cabeçalho
-            continue
-        cell.set_facecolor(colors[i % len(colors)])
-
-    # Adicionar estilo aos nomes dos usuários
-    tab.auto_set_font_size(False)
-    tab.set_fontsize(10)
-    tab.scale(1.2, 1.2)
-
-    # Salvar a imagem
-    #plt.savefig('Produtividade Varejo.png', bbox_inches='tight', pad_inches=0.5)
-    #st.pyplot(fig2)
+    st.write(prod_volumoso, width=1000, height=500)
 
     # Função para ajustar os horários para ordenação correta
     def ajustar_horario(horario):
@@ -270,7 +239,7 @@ with tab2:
             return pd.to_datetime(horario, format='%H:%M')
 
     # Calculando as tarefas por hora como você já fez
-    tarefas_por_hora = varejo.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
+    tarefas_por_hora = volumoso.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
     tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
     tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
 
@@ -311,3 +280,117 @@ with tab2:
     # Exibindo a tabela estilizada no Streamlit
     st.write("Tarefas por Hora:")
     st.dataframe(tarefas_pivot_styled)
+
+with tab3:
+
+    st.subheader("Acompanhamento Separação Varejo")
+    
+
+    pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
+
+    area_varejo = ['SEP VAREJO 01 - (PICKING)']
+    pedidos.drop(columns=colunas)
+
+    pedidos = pedidos[pedidos['Descrição (Area de Separacao)'].isin(area_varejo)]
+
+    pedidos['O.C'] = pedidos['O.C'].astype(int)
+    pedidos['O.C'] = pedidos['O.C'].astype(str)
+
+    status_varejo = pedidos.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
+
+    st.write(status_varejo)
+
+
+    st.write("Produtividade Separação")
+    #Filtrando apenas por Separação do varejo
+    
+
+    varejo = df[df['Area Separação'].isin(area_varejo)]
+
+    #Produtividade Varejo. Ordenado por apanhas
+    prod_varejo = varejo[['Usuário','Qtde Tarefas']].groupby('Usuário').agg(Apanhas=('Qtde Tarefas', 'count'), Pedidos=('Qtde Tarefas', 'nunique'))
+
+    prod_varejo = prod_varejo.sort_values(by=('Apanhas'), ascending=False)
+
+    data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora},index=['Data'], columns=prod_varejo.columns)
+
+    #Somando o total de apanhas e pedidos
+    total = pd.DataFrame({'Apanhas': prod_varejo['Apanhas'].sum(), 'Pedidos': prod_varejo['Pedidos'].sum()}, index=['Total'])
+
+    data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora },index=['Data'], columns=prod_varejo.columns)
+
+    prod_varejo.fillna(0, inplace=True)
+    # Concatenar as linhas ao DataFrame original
+    prod_varejo = pd.concat([prod_varejo, total, data_atual])
+
+    prod_varejo.fillna('', inplace=True)
+
+    #Tabela para impressão/visualização
+    prod_varejo['Usuário'] = prod_varejo.index
+
+    prod_varejo.drop(columns="Usuário", inplace=True)
+    prod_varejo.index.name = "Usuário"
+
+    st.write(prod_varejo)
+    ## TAREFAS POR HORA 
+
+    st.write('Tarefas por Hora')
+
+    tarefas_por_hora = varejo.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
+
+    tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
+
+    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
+
+    tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time())
+
+    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Ordenacao'])
+
+    # Remover a coluna de ordenação temporária
+    tarefas_por_hora = tarefas_por_hora.drop('Ordenacao', axis=1)
+
+    tarefas_pivot = tarefas_por_hora.pivot_table(index='Usuário', columns='Hora', values='Qtde Tarefas', fill_value=0)
+
+    # Ordenar o DataFrame pelas horas
+    tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time()))
+
+    # Calculando a média de cada coluna de horas
+    mean_values = tarefas_pivot.mean()
+
+    mean_values = mean_values.round(0).astype(int)
+
+    # Adicionando as médias como uma nova linha ao DataFrame tarefas_pivot
+    tarefas_pivot.loc['Média Hora'] = mean_values
+
+    mean_total  = mean_values.mean().mean()
+
+    sum_values = tarefas_pivot.sum()
+
+    sum_values = tarefas_pivot.drop('Média Hora').sum()
+
+
+    tarefas_pivot.loc['Total P/ Hora'] = sum_values
+
+    tarefas_pivot = tarefas_pivot.astype(int)
+
+    # Definir uma função para aplicar as cores com base nas condições
+    def apply_color(val):
+        color = 'green' if val > 76 else 'red'
+        return f'background-color: {color}; color: white'
+
+
+    tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
+    tarefas_pivot['Total'] = tarefas_pivot['Total'].drop('Média Hora')
+
+    tarefas_pivot['Total'].fillna(mean_total, inplace=True)
+
+    tarefas_pivot['Total'] = tarefas_pivot['Total'].astype(int)
+
+    # Aplicar a função de cor à tabela dinâmica
+    tarefas_pivot_styled = tarefas_pivot.style.applymap(apply_color)
+
+    
+       # Exibir a tabela dinâmica com estilos de cor
+    st.write(tarefas_pivot_styled)
+
+
