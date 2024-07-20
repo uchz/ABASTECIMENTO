@@ -11,7 +11,7 @@ from pandas.plotting import table
 st.title('Acompanhamento Operação Noturno')
 
 # Criação das abas
-tab1, tab2, tab3 = st.tabs(["Abastecimento", "Separação Volumoso", "Separação Varejo"])
+tab1, tab2, tab3, tab4 = st.tabs(["Abastecimento", "Separação Volumoso", "Varejo", "Confinado"])
 
 with tab1:
     st.header("Abastecimentos")
@@ -334,7 +334,7 @@ with tab3:
     st.write(prod_varejo)
     ## TAREFAS POR HORA 
 
-    st.write('Tarefas por Hora')
+    st.write('Tarefas por Hora:')
 
     tarefas_por_hora = varejo.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
 
@@ -393,4 +393,30 @@ with tab3:
        # Exibir a tabela dinâmica com estilos de cor
     st.write(tarefas_pivot_styled)
 
+    st.write('Média por Hora')
+    media_hora_data = tarefas_pivot.loc['Média Hora'][:-1]
+
+    # Criando o gráfico de linha com Matplotlib
+    fig, ax = plt.subplots(dpi=600)
+
+    # Adicionando a série de dados da média de tarefas
+    ax.plot(media_hora_data.index, media_hora_data.values, marker='o', label='Média de Tarefas', color='black')
+
+    # Adicionando a linha de meta
+    meta_value = 76  # Valor da linha de meta
+    ax.axhline(y=meta_value, color='red', linestyle='--', label='Linha de Meta')
+
+    # Configurando layout do gráfico
+    ax.set_title('Média de Tarefas por Hora')
+    ax.set_xlabel('Hora')
+    ax.set_ylabel('Quantidade Média de Tarefas')
+    plt.xticks(rotation=45)
+    ax.legend(loc='upper right')
+
+    # Usando Streamlit para exibir o gráfico
+    st.pyplot(fig)
+
+
+
+ 
 
