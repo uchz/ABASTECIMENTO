@@ -142,8 +142,6 @@ with tab1:
 
 with tab2:
     # Título da Aplicação
-    st.title('Acompanhamento da Operação Volumoso')
-
     st.subheader('Quantidade de Pedidos Pendentes por Rua')
 
     expedicao = pd.read_excel('Expedicao_de_Mercadorias.xls', header=2)
@@ -291,17 +289,17 @@ with tab3:
     area_varejo = ['SEP VAREJO 01 - (PICKING)']
     pedidos.drop(columns=colunas)
 
-    pedidos = pedidos[pedidos['Descrição (Area de Separacao)'].isin(area_varejo)]
+    status_var = pedidos[pedidos['Descrição (Area de Separacao)'].isin(area_varejo)]
 
-    pedidos['O.C'] = pedidos['O.C'].astype(int)
-    pedidos['O.C'] = pedidos['O.C'].astype(str)
+    status_var['O.C'] = status_var['O.C'].astype(int)
+    status_var['O.C'] = status_var['O.C'].astype(str)
 
-    status_varejo = pedidos.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
+    status_varejo = status_var.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
 
     st.write(status_varejo)
 
 
-    st.write("Produtividade Separação")
+    st.header("Produtividade Separação")
     #Filtrando apenas por Separação do varejo
     
 
@@ -334,7 +332,7 @@ with tab3:
     st.write(prod_varejo)
     ## TAREFAS POR HORA 
 
-    st.write('Tarefas por Hora:')
+    st.subheader('Tarefas por Hora:')
 
     tarefas_por_hora = varejo.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
 
@@ -397,7 +395,8 @@ with tab3:
     media_hora_data = tarefas_pivot.loc['Média Hora'][:-1]
 
     # Criando o gráfico de linha com Matplotlib
-    fig, ax = plt.subplots(dpi=600)
+    
+    fig, ax = plt.subplots(figsize=(12,6))
 
     # Adicionando a série de dados da média de tarefas
     ax.plot(media_hora_data.index, media_hora_data.values, marker='o', label='Média de Tarefas', color='black')
@@ -411,14 +410,58 @@ with tab3:
     ax.set_xlabel('Hora')
     ax.set_ylabel('Quantidade Média de Tarefas')
     plt.xticks(rotation=45)
+    plt.grid(True)
     ax.legend(loc='upper right')
+
+    for i, value in enumerate(media_hora_data.values):
+
+        ax.annotate(f'{value}', (media_hora_data.index[i], value), textcoords="offset points", xytext=(0,10), ha='center')
+
+# Configurando layout do gráfico
 
     # Usando Streamlit para exibir o gráfico
     st.pyplot(fig)
 
+with tab4:
+    area_confinado = ['SEP CONFINADO']
+
+    status_confinado = pedidos[pedidos['Descrição (Area de Separacao)'].isin(area_confinado)]
+
+    status_confinado.drop(columns=colunas, inplace=True)
+
+    status_confinado['O.C'] = status_confinado['O.C'].astype(int)
+    status_confinado['O.C'] = status_confinado['O.C'].astype(str)
+
+    status_confinado = status_confinado.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
+
+    st.write(status_confinado)
+
+
+
+
+
+    #Filtrando apenas por Confinado
+    confinado = df[df['Area Separação'] == 'SEP CONFINADO' ]
+
+    #Soma de apanhas e pedidos
+    prod_conf = confinado[['Usuário','Qtde Tarefas']].groupby('Usuário').agg(Apanhas=('Qtde Tarefas', 'count'), Pedidos=('Qtde Tarefas', 'nunique'))
+
+    #Ordernando por Apanhas.
+    prod_conf = prod_conf.sort_values(by='Apanhas', ascending=False)
+
+    data_confinado = pd.DataFrame({"Apanhas": data, 'Pedidos': hora},index=['Data'], columns=prod_conf.columns)
+
+    #Somando o total de apanhas e pedidos
+    total_confinado = pd.DataFrame({'Apanhas': prod_conf['Apanhas'].sum(), 'Pedidos': prod_conf['Pedidos'].sum()}, index=['Total'])
+
+    #Juntando os DF
+    prod_conf = pd.concat([prod_conf, total_confinado, data_confinado])
+   
+    prod_conf.index.name = "Usuário"
+
+    st.write(prod_conf)
+
+
+
     
-
-
-
- 
 
