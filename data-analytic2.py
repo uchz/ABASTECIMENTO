@@ -187,10 +187,7 @@ with tab2:
             return 'SEP VOLUMOSO'
                 
 
-        
-        
-        
-        
+                
 
     df['Area Separação'] = df['Area Separação'].apply(validar_e_substituir)
 
@@ -287,9 +284,12 @@ with tab3:
     pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
     area_varejo = ['SEP VAREJO 01 - (PICKING)']
+    situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência']
+    
     pedidos.drop(columns=colunas)
 
     status_var = pedidos[pedidos['Descrição (Area de Separacao)'].isin(area_varejo)]
+    status_var = status_var[status_var['Situação'].isin(situacao)]
 
     status_var['O.C'] = status_var['O.C'].astype(int)
     status_var['O.C'] = status_var['O.C'].astype(str)
@@ -426,6 +426,7 @@ with tab4:
     area_confinado = ['SEP CONFINADO']
 
     status_confinado = pedidos[pedidos['Descrição (Area de Separacao)'].isin(area_confinado)]
+    status_confinado = status_confinado[status_confinado['Situação'].isin(situacao)]
 
     status_confinado.drop(columns=colunas, inplace=True)
 
