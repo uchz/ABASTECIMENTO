@@ -419,8 +419,30 @@ with tab3:
 
 # Configurando layout do gráfico
 
-    # Usando Streamlit para exibir o gráfico
+    
     st.pyplot(fig)
+
+    st.header('Produtividade Conferência')
+
+    area_conf = ['CONFERENCIA VAREJO 1']
+
+    conferencia = df[df['Tipo '] == 'CONFERÊNCIA SEPARACAO PEDIDO']
+
+    prod_conferencia = conferencia[['Usuário','Qtde Tarefas']].groupby('Usuário').agg(Apanhas=('Qtde Tarefas', 'count'), Pedidos=('Qtde Tarefas', 'nunique'))
+
+    prod_conferencia = prod_conferencia.sort_values(by=('Apanhas'), ascending=False)
+
+    data_atual = pd.DataFrame({"Apanhas": data, 'Pedidos': hora},index=['Data'], columns=prod_conferencia.columns)
+
+    #Somando o total de apanhas e pedidos
+    total = pd.DataFrame({'Apanhas': prod_conferencia['Apanhas'].sum(), 'Pedidos': prod_conferencia['Pedidos'].sum()}, index=['Total'])
+
+    # Concatenar as linhas ao DataFrame original
+    prod_conferencia = pd.concat([prod_conferencia, total, data_atual])
+
+    prod_conferencia['Usuário'] = prod_conferencia.index
+
+    st.write(prod_conferencia)
 
 with tab4:
     area_confinado = ['SEP CONFINADO']
