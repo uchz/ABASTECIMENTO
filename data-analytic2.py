@@ -178,6 +178,7 @@ with tab2:
 
     df['Hora'] = pd.to_datetime(df['Hora'], format='%H').dt.time
 
+    df_conf = df
     df = df[df['Tipo '] == 'SEPARAÇÃO']
 
     def validar_e_substituir(valor):
@@ -195,7 +196,7 @@ with tab2:
     st.subheader('Produtividade Separação')
 
         #Filtrando apenas por Separação do varejo
-    area_var = ['SEP VOLUMOSO' ]
+    area_var = ['SEP VOLUMOSO']
 
     volumoso = df[df['Area Separação'].isin(area_var)]
 
@@ -424,9 +425,9 @@ with tab3:
 
     st.header('Produtividade Conferência')
 
-    area_conf = ['CONFERENCIA VAREJO 1']
+    area_conf = ['CONFERÊNCIA SEPARACAO PEDIDO']
 
-    conferencia = df[df['Tipo '] == 'CONFERÊNCIA SEPARACAO PEDIDO']
+    conferencia = df_conf[df_conf['Area Separação'].isin(area_conf)]
 
     prod_conferencia = conferencia[['Usuário','Qtde Tarefas']].groupby('Usuário').agg(Apanhas=('Qtde Tarefas', 'count'), Pedidos=('Qtde Tarefas', 'nunique'))
 

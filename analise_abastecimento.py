@@ -5,7 +5,7 @@
 # %% 
 import pandas as pd
 
-df = pd.read_excel('produtividade_abastecimento.xlsx', header=2)
+df = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
 # %%
 df.rename(columns={'Tipo ': 'Tipo'}, inplace=True)
 # %%
