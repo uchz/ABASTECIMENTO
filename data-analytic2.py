@@ -59,7 +59,7 @@ with tab1:
     df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.time
 
     tipo = ['PREVENTIVO', 'CORRETIVO', 'TRANSFERÊNCIA']
-    empilhadores = ['JOSIMAR.DUTRA', 'CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS', 'CLAUDIO.MARINS', 'THIAGO.SOARES']
+    empilhadores = ['JOSIMAR.DUTRA', 'CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA']
 
     df_desempenho = df_desempenho[df_desempenho['Tipo '].isin(tipo)]
     df_desempenho = df_desempenho[df_desempenho['Usuário'].isin(empilhadores)]
