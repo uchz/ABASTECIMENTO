@@ -7,6 +7,8 @@ import seaborn as sns
 from pandas.plotting import table
 
 
+
+
 # Título da Aplicação
 st.title('Acompanhamento Operação Noturno')
 
@@ -164,6 +166,7 @@ with tab2:
     df = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
 
     #Função para trazer data e hora atualizada
+    @st.cache_data
     def data ():
 
         data_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%d-%m-%Y')
@@ -420,13 +423,30 @@ with tab3:
         ax.annotate(f'{value}', (media_hora_data.index[i], value), textcoords="offset points", xytext=(0,10), ha='center')
 
 # Configurando layout do gráfico
+    df_conf = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
 
+    #Função para trazer data e hora atualizada
+    @st.cache_data
+    def data ():
+
+        data_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%d-%m-%Y')
+        hora_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%H:%M')
+
+        return data_atual, hora_atual
+
+    data, hora = data()
+
+    df_conf['Dt./Hora Inicial'] = pd.to_datetime( df_conf['Dt./Hora Inicial'], format='%d/%m/%Y %H:%M:%S')
+
+    df_conf['Hora'] = df_conf['Dt./Hora Inicial'].dt.hour
+
+    df_conf['Hora'] = pd.to_datetime(df_conf['Hora'], format='%H').dt.time
     
     st.pyplot(fig)
 
     st.header('Produtividade Conferência')
 
-    area_conf = ['CONFERÊNCIA SEPARACAO PEDIDO']
+    area_conf = ['CONFERENCIA VAREJO 1']
 
     conferencia = df_conf[df_conf['Area Separação'].isin(area_conf)]
 
@@ -443,6 +463,8 @@ with tab3:
     prod_conferencia = pd.concat([prod_conferencia, total, data_atual])
 
     prod_conferencia['Usuário'] = prod_conferencia.index
+    prod_conferencia.drop(columns="Usuário", inplace=True)
+    prod_conferencia.index.name = "Usuário"
 
     st.write(prod_conferencia)
 
@@ -460,9 +482,6 @@ with tab4:
     status_confinado = status_confinado.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
 
     st.write(status_confinado)
-
-
-
 
 
     #Filtrando apenas por Confinado
