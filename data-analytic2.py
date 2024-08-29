@@ -14,9 +14,10 @@ st.title('Acompanhamento Operação Noturno')
 tab1, tab2, tab3, tab4 = st.tabs(["Abastecimento", "Separação Volumoso", "Varejo", "Confinado"])
 
 with tab1:
+
     st.header("Abastecimentos")
     
-    # Upload do arquivo de abastecimento
+    #Upload do arquivo de abastecimento
     df_abastecimento = pd.read_excel('abastecimento-por-oc.xls', header=2)
     df_abastecimento = df_abastecimento[['CODPROD', 'DESCDESTINO', 'AREA DE SEPA ENDEREçO DESTINO']]
     df_abastecimento = df_abastecimento.drop_duplicates(subset=['CODPROD', 'DESCDESTINO'])
