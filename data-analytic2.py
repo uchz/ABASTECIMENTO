@@ -289,7 +289,7 @@ with tab3:
     pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
     area_varejo = ['SEP VAREJO 01 - (PICKING)']
-    situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência']
+    situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
     
     pedidos.drop(columns=colunas)
 
