@@ -468,6 +468,67 @@ with tab3:
 
     st.write(prod_conferencia)
 
+    ## TAREFAS POR HORA 
+
+    st.subheader('Tarefas por Hora:')
+
+    tarefas_por_hora = conferencia.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
+
+    tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
+
+    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
+
+    tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time())
+
+    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Ordenacao'])
+
+    # Remover a coluna de ordenação temporária
+    tarefas_por_hora = tarefas_por_hora.drop('Ordenacao', axis=1)
+
+    tarefas_pivot = tarefas_por_hora.pivot_table(index='Usuário', columns='Hora', values='Qtde Tarefas', fill_value=0)
+
+    # Ordenar o DataFrame pelas horas
+    tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time()))
+
+    # Calculando a média de cada coluna de horas
+    mean_values = tarefas_pivot.mean()
+
+    mean_values = mean_values.round(0).astype(int)
+
+    # Adicionando as médias como uma nova linha ao DataFrame tarefas_pivot
+    tarefas_pivot.loc['Média Hora'] = mean_values
+
+    mean_total  = mean_values.mean().mean()
+
+    sum_values = tarefas_pivot.sum()
+
+    sum_values = tarefas_pivot.drop('Média Hora').sum()
+
+
+    tarefas_pivot.loc['Total P/ Hora'] = sum_values
+
+    tarefas_pivot = tarefas_pivot.astype(int)
+
+    # Definir uma função para aplicar as cores com base nas condições
+    def apply_color(val):
+        color = 'green' if val > 80 else 'red'
+        return f'background-color: {color}; color: white'
+
+
+    tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
+    tarefas_pivot['Total'] = tarefas_pivot['Total'].drop('Média Hora')
+
+    tarefas_pivot['Total'].fillna(mean_total, inplace=True)
+
+    tarefas_pivot['Total'] = tarefas_pivot['Total'].astype(int)
+
+    # Aplicar a função de cor à tabela dinâmica
+    tarefas_pivot_styled = tarefas_pivot.style.applymap(apply_color)
+
+    
+       # Exibir a tabela dinâmica com estilos de cor
+    st.write(tarefas_pivot_styled)
+
 with tab4:
     area_confinado = ['SEP CONFINADO']
 
