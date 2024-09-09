@@ -96,3 +96,30 @@ df_importados = pd.DataFrame({
 resultado_final = pd.concat([df_feito_total, df_importados], ignore_index=True)
 resultado_final
 # %%
+import pandas as pd
+
+# Exemplo de DataFrame com o total de tarefas "Feito" e "Importados"
+data = {
+    'Situação': ['Feito', 'Importados'],
+    'Qtd. Tarefas': [13, 15],
+    'Descrição (Area de Separacao)': ['Todos os setores', 'Todos os setores']
+}
+df = pd.DataFrame(data)
+
+# 1. Calcular a porcentagem de "Feito" em relação ao total de "Importados"
+percent_feito = (df.loc[df['Situação'] == 'Feito', 'Qtd. Tarefas'].values[0] / df.loc[df['Situação'] == 'Importados', 'Qtd. Tarefas'].values[0]) * 100
+
+# 2. Adicionar a linha com a porcentagem
+df_percent = pd.DataFrame({
+    'Situação': ['Porcentagem Feito'],
+    'Qtd. Tarefas': [f'{percent_feito:.2f}%'],
+    'Descrição (Area de Separacao)': ['Todos os setores']
+})
+
+# Concatenar o DataFrame original com o de porcentagem
+df_final = pd.concat([df, df_percent], ignore_index=True)
+
+# Exibindo o resultado
+print(df_final)
+
+# %%

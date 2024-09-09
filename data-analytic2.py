@@ -14,7 +14,7 @@ st.title('Acompanhamento Operação Noturno')
 
 st.markdown('ATUALIZAÇÕES AS: **21:15** / 22:15 / 23:15 / 00:15 / 01:15 / 02:15 / 03:15 / 04:15')
 # Criação das abas
-tab5, tab1, tab2, tab3, tab4,  = st.tabs(['Apanhas',"Abastecimento", "Separação Volumoso", "Varejo", "Confinado"])
+tab5, tab1, tab2, tab3, tab4, tab6  = st.tabs(['Apanhas',"Abastecimento", "Separação Volumoso", "Varejo", "Confinado", 'Conexões'])
 
 
 
@@ -433,22 +433,22 @@ with tab3:
        # Exibir a tabela dinâmica com estilos de cor
     st.write(tarefas_pivot_styled)
 
-    tarefas_por_hora = varejo.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
-    tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
-    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
-    tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time())
-    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Ordenacao'])
-    tarefas_por_hora = tarefas_por_hora.drop('Ordenacao', axis=1)
-    tarefas_pivot = tarefas_por_hora.pivot_table(index='Usuário', columns='Hora', values='Qtde Tarefas', fill_value=0)
-    tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time()))
-    sum_values = tarefas_pivot.sum()
-    tarefas_pivot.loc['Total P/ Hora'] = sum_values
-    tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
-    tarefas_pivot['Total'] = tarefas_pivot['Total'].astype(int)
+    # tarefas_por_hora = varejo.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
+    # tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
+    # tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
+    # tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time())
+    # tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Ordenacao'])
+    # tarefas_por_hora = tarefas_por_hora.drop('Ordenacao', axis=1)
+    # tarefas_pivot = tarefas_por_hora.pivot_table(index='Usuário', columns='Hora', values='Qtde Tarefas', fill_value=0)
+    # tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time()))
+    # sum_values = tarefas_pivot.sum()
+    # tarefas_pivot.loc['Total P/ Hora'] = sum_values
+    # tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
+    # tarefas_pivot['Total'] = tarefas_pivot['Total'].astype(int)
 
     st.subheader('Tarefas por Hora')
 
-    st.write(tarefas_pivot)
+    #st.write(tarefas_pivot)
 
     tarefas_pivot = tarefas_pivot.drop(columns='Total')
     total_hora_data = tarefas_pivot.loc['Total P/ Hora']
@@ -575,21 +575,21 @@ with tab3:
        # Exibir a tabela dinâmica com estilos de cor
     st.write(tarefas_pivot_styled)
 
-    tarefas_por_hora = conferencia.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
-    tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
-    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
-    tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time())
-    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Ordenacao'])
-    tarefas_por_hora = tarefas_por_hora.drop('Ordenacao', axis=1)
-    tarefas_pivot = tarefas_por_hora.pivot_table(index='Usuário', columns='Hora', values='Qtde Tarefas', fill_value=0)
-    tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time()))
-    sum_values = tarefas_pivot.sum()
-    tarefas_pivot.loc['Total P/ Hora'] = sum_values
-    tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
-    tarefas_pivot['Total'] = tarefas_pivot['Total'].astype(int)
+    # tarefas_por_hora = conferencia.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
+    # tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
+    # tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
+    # tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time())
+    # tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Ordenacao'])
+    # tarefas_por_hora = tarefas_por_hora.drop('Ordenacao', axis=1)
+    # tarefas_pivot = tarefas_por_hora.pivot_table(index='Usuário', columns='Hora', values='Qtde Tarefas', fill_value=0)
+    # tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time()))
+    # sum_values = tarefas_pivot.sum()
+    # tarefas_pivot.loc['Total P/ Hora'] = sum_values
+    # tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
+    # tarefas_pivot['Total'] = tarefas_pivot['Total'].astype(int)
 
-    st.subheader('Tarefas por Hora')
-    st.write(tarefas_pivot)
+    #st.subheader('Tarefas por Hora')
+    #st.write(tarefas_pivot)
 
     tarefas_pivot = tarefas_pivot.drop(columns='Total')
     total_hora_data = tarefas_pivot.loc['Total P/ Hora']
@@ -712,3 +712,74 @@ with tab5:
 
 
     st.write(resultado_final)
+
+with tab6:
+    area_conexoes = ['SEP VAREJO CONEXOES']
+
+    status_conexoes = pedidos[pedidos['Descrição (Area de Separacao)'].isin(area_conexoes)]
+    status_conexoes = status_conexoes[status_conexoes['Situação'].isin(situacao)]
+
+    status_conexoes.drop(columns=colunas, inplace=True)
+
+    status_conexoes['O.C'] = status_conexoes['O.C'].astype(int)
+    status_conexoes['O.C'] = status_conexoes['O.C'].astype(str)
+
+    status_conexoes = status_conexoes.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
+
+    st.write(status_conexoes)
+
+
+    #Filtrando apenas por Confinado
+    conexoes = df[df['Area Separação'] == 'SEP VAREJO CONEXOES' ]
+
+    #Soma de apanhas e pedidos
+    prod_conexoes = conexoes[['Usuário','Qtde Tarefas']].groupby('Usuário').agg(Apanhas=('Qtde Tarefas', 'count'), Pedidos=('Qtde Tarefas', 'nunique'))
+
+    #Ordernando por Apanhas.
+    prod_conexoes = prod_conexoes.sort_values(by='Apanhas', ascending=False)
+
+    data_conexoes = pd.DataFrame({"Apanhas": data, 'Pedidos': hora},index=['Data'], columns=prod_conexoes.columns)
+
+    #Somando o total de apanhas e pedidos
+    total_conexoes = pd.DataFrame({'Apanhas': prod_conexoes['Apanhas'].sum(), 'Pedidos': prod_conexoes['Pedidos'].sum()}, index=['Total'])
+
+    #Juntando os DF
+    prod_conexoes = pd.concat([prod_conexoes, total_conexoes, data_conexoes])
+   
+    prod_conexoes.index.name = "Usuário"
+
+    st.write(prod_conexoes)
+
+    tarefas_por_hora = conexoes.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
+    tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
+    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
+    tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time())
+    tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Ordenacao'])
+    tarefas_por_hora = tarefas_por_hora.drop('Ordenacao', axis=1)
+    tarefas_pivot = tarefas_por_hora.pivot_table(index='Usuário', columns='Hora', values='Qtde Tarefas', fill_value=0)
+    tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time()))
+    sum_values = tarefas_pivot.sum()
+    tarefas_pivot.loc['Total P/ Hora'] = sum_values
+    tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
+    tarefas_pivot['Total'] = tarefas_pivot['Total'].astype(int)
+
+    #st.subheader('Tarefas por Hora')
+    #st.write(tarefas_pivot)
+
+    tarefas_pivot = tarefas_pivot.drop(columns='Total')
+    total_hora_data = tarefas_pivot.loc['Total P/ Hora']
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(total_hora_data.index, total_hora_data.values, marker='o', linestyle='-', color='black', label='Total de Tarefas')
+
+    for i, (hora, total) in enumerate(total_hora_data.items()):
+        plt.annotate(f'{int(total)}', (hora, total), textcoords="offset points", xytext=(0, 10), ha='center')
+
+    plt.title('Total de Tarefas por Hora')
+    plt.xlabel('Hora')
+    plt.ylabel('Quantidade Total de Tarefas')
+    plt.xticks(rotation=45)
+    plt.legend(loc='upper left')
+    plt.grid(True)
+    plt.tight_layout()
+    st.pyplot(plt)
