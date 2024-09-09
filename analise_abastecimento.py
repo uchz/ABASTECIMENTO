@@ -63,3 +63,36 @@ for i in ax.containers:
 # Exibir o gráfico
 plt.show()
 # %%
+import pandas as pd 
+df = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
+
+# %%
+df['Qtd. Tarefas'] = pd.to_numeric(df['Qtd. Tarefas'], errors='coerce')
+
+agrupado = df.groupby(['Situação', 'Descrição (Area de Separacao)'])['Qtd. Tarefas'].sum().reset_index()
+agrupado['Descrição (Area de Separacao)'].unique()
+# %%
+varejo = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO 01 - (PICKING)'].reset_index()
+varejo
+# %%
+
+feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Aguardando conferência volumes','Aguardando conferência', 'Concluído']
+varejo_feito = varejo[varejo['Situação'].isin(feito)].copy()
+varejo_feito['Situação'] = 'Apanhas Realizadas'
+varejo_feito
+# %%
+df_feito_total = pd.DataFrame({
+    'Situação': ['Feito'],
+    'Total Apanhas': [varejo['Qtd. Tarefas'].sum()],
+    'Setor': ['Varejo']  # Renomear o setor
+})
+
+df_importados = pd.DataFrame({
+    'Situação': ['Importados'],
+    'Total Apanhas': [varejo['Qtd. Tarefas'].sum()],
+    'Setor': ['Varejo']
+})
+
+resultado_final = pd.concat([df_feito_total, df_importados], ignore_index=True)
+resultado_final
+# %%

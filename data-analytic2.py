@@ -13,7 +13,9 @@ from pandas.plotting import table
 st.title('Acompanhamento Operação Noturno')
 
 # Criação das abas
-tab1, tab2, tab3, tab4 = st.tabs(["Abastecimento", "Separação Volumoso", "Varejo", "Confinado"])
+tab5, tab1, tab2, tab3, tab4,  = st.tabs(['Apanhas',"Abastecimento", "Separação Volumoso", "Varejo", "Confinado"])
+
+
 
 with tab1:
 
@@ -567,6 +569,57 @@ with tab4:
     st.write(prod_conf)
 
 
+with tab5:
+ #QUANTIDADE DE APANHAS REALIZADAS
+    st.header('Expedição')
 
+    pedidos['Qtd. Tarefas'] = pd.to_numeric(pedidos['Qtd. Tarefas'], errors='coerce')
+
+    agrupado = pedidos.groupby(['Situação', 'Descrição (Area de Separacao)'])['Qtd. Tarefas'].sum().reset_index()
+
+    varejo = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO 01 - (PICKING)'].reset_index()
     
 
+
+    feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Aguardando conferência volumes','Aguardando conferência', 'Concluído']
+    varejo_feito = varejo[varejo['Situação'].isin(feito)].copy()
+    varejo_feito['Situação'] = 'Apanhas Realizadas'
+
+
+    confinado = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP CONFINADO'].reset_index()
+    confinado_feito = confinado[confinado['Situação'].isin(feito)].copy()
+    confinado_feito['Situação'] = 'Apanhas Realizadas'
+
+    agrupado['Descrição (Area de Separacao)'] = agrupado['Descrição (Area de Separacao)'].apply(validar_e_substituir)
+    volumoso = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VOLUMOSO'].reset_index()
+    volumoso_feito = volumoso[volumoso['Situação'].isin(feito)].copy()
+    volumoso_feito['Situação'] = 'Apanhas Realizadas'
+
+
+    df_feito_total = pd.DataFrame({
+        'Situação': ['Feito'],
+        'Varejo': [varejo_feito['Qtd. Tarefas'].sum()],
+        'Confinado': [confinado_feito['Qtd. Tarefas'].sum()],
+        'Volumoso': [volumoso_feito['Qtd. Tarefas'].sum()]
+        
+    })
+
+    df_importados = pd.DataFrame({
+        'Situação': ['Importados'],
+        'Varejo': [varejo['Qtd. Tarefas'].sum()],
+        'Confinado': [confinado['Qtd. Tarefas'].sum()],
+        'Volumoso': [volumoso['Qtd. Tarefas'].sum()]        
+    })
+    
+    
+
+
+
+
+
+
+
+
+
+    resultado_final = pd.concat([df_feito_total, df_importados], ignore_index=True)
+    st.write(resultado_final)
