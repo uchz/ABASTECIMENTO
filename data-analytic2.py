@@ -12,7 +12,7 @@ from pandas.plotting import table
 # Título da Aplicação
 st.title('Acompanhamento Operação Noturno')
 
-st.markdown('ATUALIZAÇÕES AS: **21:15** / 22:15 / 23:15 / 00:15 / 01:15 / 02:15 / 03:15 / 04:15')
+#st.markdown('ATUALIZAÇÕES AS: **21:15** / 22:15 / 23:15 / 00:15 / 01:15 / 02:15 / 03:15 / 04:15')
 # Criação das abas
 tab5, tab1, tab2, tab3, tab4, tab6  = st.tabs(['Apanhas',"Abastecimento", "Separação Volumoso", "Varejo", "Confinado", 'Conexões'])
 
