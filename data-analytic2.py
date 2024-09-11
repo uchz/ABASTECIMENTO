@@ -40,7 +40,10 @@ with tab1:
     df_abastecimento.rename(columns={"AREA DE SEPA ENDEREçO DESTINO" : "Area", 'CODPROD' : 'Qtd Códigos'}, inplace=True)
 
     st.subheader('Abastecimentos por Área')
-    st.write(df_abastecimento.groupby('Area')['Qtd Códigos'].count())
+
+    abastecimento_area = df_abastecimento.groupby('Area')['Qtd Códigos'].count()
+
+    st.write(abastecimento_area)
 
 
     st.header("Desempenho dos Operadores")
@@ -410,8 +413,8 @@ with tab3:
 
 
     tarefas_pivot.loc['Total P/ Hora'] = sum_values
-
-    tarefas_pivot = tarefas_pivot.astype(int, errors='ignore')
+    tarefas_pivot = tarefas_pivot.fillna(0)
+    tarefas_pivot = tarefas_pivot.astype(int)
 
     # Definir uma função para aplicar as cores com base nas condições
     def apply_color(val):
@@ -691,20 +694,22 @@ with tab5:
         'Varejo': [int(varejo['Qtd. Tarefas'].sum())],
         'Confinado': [int(confinado['Qtd. Tarefas'].sum())],
         'Volumoso': [int(volumoso['Qtd. Tarefas'].sum())] ,
-        'Conexoes': [int(conexoes['Qtd. Tarefas'].sum())] 
+        'Conexões': [int(conexoes['Qtd. Tarefas'].sum())] 
               
         })
     
     percent_varejo = (df_feito_total['Varejo'].values[0] / df_importados['Varejo'].values[0]) * 100
     percent_confinado = (df_feito_total['Confinado'].values[0] / df_importados['Confinado'].values[0]) * 100
     percent_volumoso = (df_feito_total['Volumoso'].values[0] / df_importados['Volumoso'].values[0]) * 100
+    percent_conexoes = (df_feito_total['Conexões'].values[0] / df_importados['Conexões'].values[0]) * 100
 
     # 3. Adicionar uma linha com as porcentagens
     df_percent = pd.DataFrame({
         'Situação': ['Porcentagem Feito'],
         'Varejo': [f'{percent_varejo:.2f}%'],
         'Confinado': [f'{percent_confinado:.2f}%'],
-        'Volumoso': [f'{percent_volumoso:.2f}%']
+        'Volumoso': [f'{percent_volumoso:.2f}%'],
+        'Conexões' : [f'{percent_conexoes:.2f}%']
         })
 
 
