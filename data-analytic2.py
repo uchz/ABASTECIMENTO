@@ -411,7 +411,7 @@ with tab3:
 
     tarefas_pivot.loc['Total P/ Hora'] = sum_values
 
-    tarefas_pivot = tarefas_pivot.astype(int)
+    tarefas_pivot = tarefas_pivot.astype(int, errors='ignore')
 
     # Definir uma função para aplicar as cores com base nas condições
     def apply_color(val):
@@ -457,7 +457,7 @@ with tab3:
     plt.plot(total_hora_data.index, total_hora_data.values, marker='o', linestyle='-', color='black', label='Total de Tarefas')
 
     for i, (hora, total) in enumerate(total_hora_data.items()):
-        plt.annotate(f'{int(total)}', (hora, total), textcoords="offset points", xytext=(0, 10), ha='center')
+        plt.annotate((total), (hora, total), textcoords="offset points", xytext=(0, 10), ha='center')
 
     plt.title('Total de Tarefas por Hora')
     plt.xlabel('Hora')
@@ -668,6 +668,10 @@ with tab5:
     confinado_feito = confinado[confinado['Situação'].isin(feito)].copy()
     confinado_feito['Situação'] = 'Apanhas Realizadas'
 
+    conexoes = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO CONEXOES'].reset_index()
+    conexoes_feito = conexoes[conexoes['Situação'].isin(feito)].copy()
+    conexoes_feito['Situação'] = 'Apanhas Realizadas'
+
     agrupado['Descrição (Area de Separacao)'] = agrupado['Descrição (Area de Separacao)'].apply(validar_e_substituir)
     volumoso = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VOLUMOSO'].reset_index()
     volumoso_feito = volumoso[volumoso['Situação'].isin(feito)].copy()
@@ -678,16 +682,18 @@ with tab5:
         'Situação': ['Feito'],
         'Varejo': [int(varejo_feito['Qtd. Tarefas'].sum())],
         'Confinado': [int(confinado_feito['Qtd. Tarefas'].sum())],
-        'Volumoso': [int(volumoso_feito['Qtd. Tarefas'].sum())]
-        
-    })
+        'Volumoso': [int(volumoso_feito['Qtd. Tarefas'].sum())],
+        'Conexões': [int(conexoes_feito['Qtd. Tarefas'].sum())]
+        })
 
     df_importados = pd.DataFrame({
         'Situação': ['Importados'],
         'Varejo': [int(varejo['Qtd. Tarefas'].sum())],
         'Confinado': [int(confinado['Qtd. Tarefas'].sum())],
-        'Volumoso': [int(volumoso['Qtd. Tarefas'].sum())]        
-    })
+        'Volumoso': [int(volumoso['Qtd. Tarefas'].sum())] ,
+        'Conexoes': [int(conexoes['Qtd. Tarefas'].sum())] 
+              
+        })
     
     percent_varejo = (df_feito_total['Varejo'].values[0] / df_importados['Varejo'].values[0]) * 100
     percent_confinado = (df_feito_total['Confinado'].values[0] / df_importados['Confinado'].values[0]) * 100
@@ -699,7 +705,7 @@ with tab5:
         'Varejo': [f'{percent_varejo:.2f}%'],
         'Confinado': [f'{percent_confinado:.2f}%'],
         'Volumoso': [f'{percent_volumoso:.2f}%']
-    })
+        })
 
 
 
