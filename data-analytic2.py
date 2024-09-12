@@ -14,7 +14,7 @@ st.title('Acompanhamento Operação Noturno')
 
 #st.markdown('ATUALIZAÇÕES AS: **21:15** / 22:15 / 23:15 / 00:15 / 01:15 / 02:15 / 03:15 / 04:15')
 # Criação das abas
-tab5, tab1, tab2, tab3, tab4, tab6  = st.tabs(['Apanhas',"Abastecimento", "Separação Volumoso", "Varejo", "Confinado", 'Conexões'])
+tab5, tab1, tab2, tab3, tab4, tab6  = st.tabs(['Apanhas',"Abastecimento", "Volumoso", "Varejo", "Confinado", 'Conexões'])
 
 
 
@@ -43,14 +43,15 @@ with tab1:
 
     abastecimento_area = df_abastecimento.groupby('Area')['Qtd Códigos'].count()
 
-    st.write(abastecimento_area)
+    st.table(abastecimento_area)
 
 
-    st.header("Desempenho dos Operadores")
+    st.title("Desempenho dos Operadores")
     
     # Carga e Processamento dos Dados de Desempenho dos Operadores
     df_desempenho = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
     
+    df = df_desempenho
 
     # Definindo fuso
     fuso_horario = 'America/Sao_Paulo'
@@ -76,24 +77,12 @@ with tab1:
 
     contagem_tipos = corretivo_preventivo.groupby('Usuário')['Tipo '].count().sort_values(ascending=False)
 
-    #fig, ax = plt.subplots(figsize=(10, 6), dpi=600)
-    #bars = contagem_tipos.plot(kind='bar', color='red', ax=ax)
-
-    #for bar in bars.patches:
-    #     ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.3, bar.get_height(), 
-    #             ha='center', va='bottom', fontsize=8)
-    # plt.title('Total de Corretivos + Preventivos por Empilhador')
-    # plt.xlabel('Empilhador')
-    # plt.ylabel('Total de Abastecimentos')
-    # plt.xticks(rotation=0)
-    # st.pyplot(plt)
 
     contagem_tipos = df_desempenho.groupby(['Usuário', 'Tipo ']).size().unstack(fill_value=0)
     contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
     contagem_tipos.loc['Total'] = contagem_tipos.sum()
 
-    st.title('Total de tarefas por Empilhador')
-    st.write('Tarefas por empilhador:')
+    st.header('Total de tarefas por Empilhador')
     st.dataframe(contagem_tipos)
 
     cores = sns.color_palette('afmhot', len(contagem_tipos.columns[:-1]))
@@ -134,7 +123,7 @@ with tab1:
     tarefas_pivot = tarefas_pivot.drop(columns='Total')
     total_hora_data = tarefas_pivot.loc['Total P/ Hora']
 
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(13, 7), dpi=800 )
     plt.plot(total_hora_data.index, total_hora_data.values, marker='o', linestyle='-', color='black', label='Total de Tarefas')
 
     for i, (hora, total) in enumerate(total_hora_data.items()):
@@ -169,7 +158,7 @@ with tab2:
 
     st.write(status)
 
-    df = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
+    #df = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
 
     #Função para trazer data e hora atualizada
     @st.cache_data
