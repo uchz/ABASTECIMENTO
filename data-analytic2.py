@@ -5,7 +5,7 @@ import pytz
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pandas.plotting import table
-
+import altair as alt
 
 
 
@@ -43,7 +43,7 @@ with tab1:
 
     abastecimento_area = df_abastecimento.groupby('Area')['Qtd Códigos'].count()
 
-    st.table(abastecimento_area)
+    st.dataframe(abastecimento_area)
 
 
     st.title("Desempenho dos Operadores")
@@ -82,27 +82,50 @@ with tab1:
     contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
     contagem_tipos.loc['Total'] = contagem_tipos.sum()
 
-    st.header('Total de tarefas por Empilhador')
+    st.header('Abastecimentos por Empilhador')
     st.dataframe(contagem_tipos)
 
     cores = sns.color_palette('afmhot', len(contagem_tipos.columns[:-1]))
     tipos = contagem_tipos.columns[:-1]
 
-    fig, ax = plt.subplots()
+    # fig, ax = plt.subplots()
 
-    index = range(len(contagem_tipos.index)-1)
-    bar_width = 0.2
-    for i, (tipo, cor) in enumerate(zip(tipos, cores)):
-        ax.bar([x + i * bar_width for x in index], contagem_tipos.iloc[:-1][tipo], width=bar_width, label=tipo, color=cor)
+    # index = range(len(contagem_tipos.index)-1)
+    # bar_width = 0.2
+    # for i, (tipo, cor) in enumerate(zip(tipos, cores)):
+    #     ax.bar([x + i * bar_width for x in index], contagem_tipos.iloc[:-1][tipo], width=bar_width, label=tipo, color=cor)
 
-    ax.set_xlabel('Empilhador')
-    ax.set_ylabel('Quantidade')
-    ax.set_title('Abastecimentos por Empilhador')
-    ax.set_xticks(index)
-    ax.set_xticklabels(contagem_tipos.index[:-1], rotation=90)
-    ax.legend()
+    # ax.set_xlabel('Empilhador')
+    # ax.set_ylabel('Quantidade')
+    # ax.set_title('Abastecimentos por Empilhador')
+    # ax.set_xticks(index)
+    # ax.set_xticklabels(contagem_tipos.index[:-1], rotation=90)
+    # ax.legend()
 
-    st.pyplot(fig)
+        # Agrupando por 'Usuário' e 'Tipo', e criando a tabela de contagem
+    contagem_tipos = df_desempenho.groupby(['Usuário', 'Tipo ']).size().unstack(fill_value=0)
+
+
+    # Transformando os dados para formato long (necessário para Altair)
+    df_long = contagem_tipos.reset_index().melt(id_vars='Usuário', var_name='Tipo', value_name='Quantidade')
+
+    # Criando o gráfico de barras com Altair
+    bar_chart = alt.Chart(df_long).mark_bar().encode(
+        x=alt.X('Usuário:N', title='Empilhador'),
+        y=alt.Y('Quantidade:Q', title='Quantidade'),
+        color=alt.Color('Tipo:N'),  # O Altair define automaticamente as cores
+    ).properties(
+        title='Abastecimentos por Empilhador'
+    ).configure_axis(
+        labelAngle=90  # Rotaciona os labels do eixo X
+    )
+
+    # Exibindo no Streamlit o gráfico sem a linha 'Total'
+    st.altair_chart(bar_chart, use_container_width=True)
+
+    # Exibindo a tabela completa, incluindo a linha 'Total'
+    st.write("Tabela de contagem com Totais:")
+    
 
     tarefas_por_hora = df_desempenho.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
     tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
@@ -120,8 +143,12 @@ with tab1:
     st.subheader('Tarefas por Hora')
     st.write(tarefas_pivot)
 
+
+    
     tarefas_pivot = tarefas_pivot.drop(columns='Total')
     total_hora_data = tarefas_pivot.loc['Total P/ Hora']
+
+    st.subheader('Evolução p/ Hora')
 
     plt.figure(figsize=(13, 7), dpi=800 )
     plt.plot(total_hora_data.index, total_hora_data.values, marker='o', linestyle='-', color='black', label='Total de Tarefas')
@@ -137,6 +164,8 @@ with tab1:
     plt.grid(True)
     plt.tight_layout()
     st.pyplot(plt)
+
+    
 
 with tab2:
     # Título da Aplicação
