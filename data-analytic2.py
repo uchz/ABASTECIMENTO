@@ -715,7 +715,9 @@ with tab5:
         'Conexões': [int(conexoes['Qtd. Tarefas'].sum())] 
               
         })
-    
+    df_feito_total[['Varejo', 'Confinado', 'Volumoso', 'Conexões']] = df_feito_total[['Varejo', 'Confinado', 'Volumoso', 'Conexões']].apply(pd.to_numeric, errors='coerce')
+    df_importados[['Varejo', 'Confinado', 'Volumoso', 'Conexões']] = df_importados[['Varejo', 'Confinado', 'Volumoso', 'Conexões']].apply(pd.to_numeric, errors='coerce')
+
     percent_varejo = (df_feito_total['Varejo'].values[0] / df_importados['Varejo'].values[0]) * 100
     percent_confinado = (df_feito_total['Confinado'].values[0] / df_importados['Confinado'].values[0]) * 100
     percent_volumoso = (df_feito_total['Volumoso'].values[0] / df_importados['Volumoso'].values[0]) * 100
@@ -733,11 +735,11 @@ with tab5:
 
 
 
-
-
-
     resultado_final = pd.concat([df_feito_total, df_importados, df_percent], ignore_index=True)
 
+    # Converter as colunas do DataFrame final para o formato numérico (excluindo a coluna 'Situação')
+
+    # Função para aplicar gráfico de barras apenas na l
 
 
     st.write(resultado_final)
