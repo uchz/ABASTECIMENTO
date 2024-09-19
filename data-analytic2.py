@@ -5,6 +5,7 @@ import pytz
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pandas.plotting import table
+import plotly.graph_objects as go
 import altair as alt
 
 
@@ -21,7 +22,7 @@ tab5, tab1, tab2, tab3, tab4, tab6  = st.tabs(['Apanhas',"Abastecimento", "Volum
 with tab1:
 
     st.header("Abastecimentos")
-    
+
     #Upload do arquivo de abastecimento
     df_abastecimento = pd.read_excel('abastecimento-por-oc.xls', header=2)
     df_abastecimento = df_abastecimento[['CODPROD', 'DESCDESTINO', 'AREA DE SEPA ENDEREçO DESTINO']]
@@ -41,16 +42,22 @@ with tab1:
 
     st.subheader('Abastecimentos por Área')
 
-    abastecimento_area = df_abastecimento.groupby('Area')['Qtd Códigos'].count()
+    abastecimento_area = df_abastecimento.groupby('Area')['Qtd Códigos'].count().reset_index()
 
+    total = abastecimento_area['Qtd Códigos'].sum()
+    total_row = pd.DataFrame({'Area': ['Total'], 'Qtd Códigos': [total]})
+    abastecimento_area = pd.concat([abastecimento_area, total_row], ignore_index=True)
+
+    abastecimento_area = abastecimento_area.set_index('Area')
+    
     st.dataframe(abastecimento_area)
 
 
     st.title("Desempenho dos Operadores")
-    
+
     # Carga e Processamento dos Dados de Desempenho dos Operadores
     df_desempenho = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
-    
+
     df = df_desempenho
 
     # Definindo fuso
@@ -124,8 +131,8 @@ with tab1:
     st.altair_chart(bar_chart, use_container_width=True)
 
     # Exibindo a tabela completa, incluindo a linha 'Total'
-    st.write("Tabela de contagem com Totais:")
-    
+    # st.write("Tabela de contagem com Totais:")
+
 
     tarefas_por_hora = df_desempenho.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
     tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
@@ -144,9 +151,11 @@ with tab1:
     st.write(tarefas_pivot)
 
 
-    
+
     tarefas_pivot = tarefas_pivot.drop(columns='Total')
     total_hora_data = tarefas_pivot.loc['Total P/ Hora']
+
+
 
     st.subheader('Evolução p/ Hora')
 
@@ -165,7 +174,7 @@ with tab1:
     plt.tight_layout()
     st.pyplot(plt)
 
-    
+
 
 with tab2:
     # Título da Aplicação
@@ -214,9 +223,9 @@ with tab2:
             return valor
         else:
             return 'SEP VOLUMOSO'
-                
 
-                
+
+
 
     df['Area Separação'] = df['Area Separação'].apply(validar_e_substituir)
 
@@ -251,7 +260,7 @@ with tab2:
     prod_volumoso['Usuário'] = prod_volumoso.index
     prod_volumoso.drop(columns="Usuário", inplace=True)
     prod_volumoso.index.name = "Usuário"
-    
+
     st.write(prod_volumoso, width=1000, height=500)
 
     # Função para ajustar os horários para ordenação correta
@@ -342,13 +351,13 @@ with tab2:
 with tab3:
 
     st.subheader("Acompanhamento Separação Varejo")
-    
+
 
     pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
     area_varejo = ['SEP VAREJO 01 - (PICKING)']
     situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
-    
+
     pedidos.drop(columns=colunas)
 
     status_var = pedidos[pedidos['Descrição (Area de Separacao)'].isin(area_varejo)]
@@ -364,7 +373,7 @@ with tab3:
 
     st.header("Produtividade Separação")
     #Filtrando apenas por Separação do varejo
-    
+
 
     varejo = df[df['Area Separação'].isin(area_varejo)]
 
@@ -393,7 +402,7 @@ with tab3:
     prod_varejo.index.name = "Usuário"
 
     st.write(prod_varejo)
-    ## TAREFAS POR HORA 
+    ## TAREFAS POR HORA
 
     st.subheader('Tarefas por Hora:')
 
@@ -450,7 +459,7 @@ with tab3:
     # Aplicar a função de cor à tabela dinâmica
     tarefas_pivot_styled = tarefas_pivot.style.applymap(apply_color)
 
-    
+
        # Exibir a tabela dinâmica com estilos de cor
     st.write(tarefas_pivot_styled)
 
@@ -508,7 +517,7 @@ with tab3:
     df_conf['Hora'] = df_conf['Dt./Hora Inicial'].dt.hour
 
     df_conf['Hora'] = pd.to_datetime(df_conf['Hora'], format='%H').dt.time
-    
+
     #st.pyplot(fig)
 
     st.header('Produtividade Conferência')
@@ -535,7 +544,7 @@ with tab3:
 
     st.write(prod_conferencia)
 
-    ## TAREFAS POR HORA 
+    ## TAREFAS POR HORA
 
     st.subheader('Tarefas por Hora:')
 
@@ -592,7 +601,7 @@ with tab3:
     # Aplicar a função de cor à tabela dinâmica
     tarefas_pivot_styled = tarefas_pivot.style.applymap(apply_color)
 
-    
+
        # Exibir a tabela dinâmica com estilos de cor
     st.write(tarefas_pivot_styled)
 
@@ -662,87 +671,10 @@ with tab4:
 
     #Juntando os DF
     prod_conf = pd.concat([prod_conf, total_confinado, data_confinado])
-   
+
     prod_conf.index.name = "Usuário"
 
     st.write(prod_conf)
-
-
-with tab5:
- #QUANTIDADE DE APANHAS REALIZADAS
-    st.header('Expedição')
-
-    pedidos['Qtd. Tarefas'] = pd.to_numeric(pedidos['Qtd. Tarefas'], errors='coerce')
-
-    agrupado = pedidos.groupby(['Situação', 'Descrição (Area de Separacao)'])['Qtd. Tarefas'].sum().reset_index()
-
-    varejo = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO 01 - (PICKING)'].reset_index()
-    
-
-
-    feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Aguardando conferência volumes','Aguardando conferência', 'Concluído']
-    varejo_feito = varejo[varejo['Situação'].isin(feito)].copy()
-    varejo_feito['Situação'] = 'Apanhas Realizadas'
-
-
-    confinado = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP CONFINADO'].reset_index()
-    confinado_feito = confinado[confinado['Situação'].isin(feito)].copy()
-    confinado_feito['Situação'] = 'Apanhas Realizadas'
-
-    conexoes = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO CONEXOES'].reset_index()
-    conexoes_feito = conexoes[conexoes['Situação'].isin(feito)].copy()
-    conexoes_feito['Situação'] = 'Apanhas Realizadas'
-
-    agrupado['Descrição (Area de Separacao)'] = agrupado['Descrição (Area de Separacao)'].apply(validar_e_substituir)
-    volumoso = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VOLUMOSO'].reset_index()
-    volumoso_feito = volumoso[volumoso['Situação'].isin(feito)].copy()
-    volumoso_feito['Situação'] = 'Apanhas Realizadas'
-
-
-    df_feito_total = pd.DataFrame({
-        'Situação': ['Feito'],
-        'Varejo': [int(varejo_feito['Qtd. Tarefas'].sum())],
-        'Confinado': [int(confinado_feito['Qtd. Tarefas'].sum())],
-        'Volumoso': [int(volumoso_feito['Qtd. Tarefas'].sum())],
-        'Conexões': [int(conexoes_feito['Qtd. Tarefas'].sum())]
-        })
-
-    df_importados = pd.DataFrame({
-        'Situação': ['Importados'],
-        'Varejo': [int(varejo['Qtd. Tarefas'].sum())],
-        'Confinado': [int(confinado['Qtd. Tarefas'].sum())],
-        'Volumoso': [int(volumoso['Qtd. Tarefas'].sum())] ,
-        'Conexões': [int(conexoes['Qtd. Tarefas'].sum())] 
-              
-        })
-    df_feito_total[['Varejo', 'Confinado', 'Volumoso', 'Conexões']] = df_feito_total[['Varejo', 'Confinado', 'Volumoso', 'Conexões']].apply(pd.to_numeric, errors='coerce')
-    df_importados[['Varejo', 'Confinado', 'Volumoso', 'Conexões']] = df_importados[['Varejo', 'Confinado', 'Volumoso', 'Conexões']].apply(pd.to_numeric, errors='coerce')
-
-    percent_varejo = (df_feito_total['Varejo'].values[0] / df_importados['Varejo'].values[0]) * 100
-    percent_confinado = (df_feito_total['Confinado'].values[0] / df_importados['Confinado'].values[0]) * 100
-    percent_volumoso = (df_feito_total['Volumoso'].values[0] / df_importados['Volumoso'].values[0]) * 100
-    percent_conexoes = (df_feito_total['Conexões'].values[0] / df_importados['Conexões'].values[0]) * 100
-
-    # 3. Adicionar uma linha com as porcentagens
-    df_percent = pd.DataFrame({
-        'Situação': ['Porcentagem Feito'],
-        'Varejo': [f'{percent_varejo:.2f}%'],
-        'Confinado': [f'{percent_confinado:.2f}%'],
-        'Volumoso': [f'{percent_volumoso:.2f}%'],
-        'Conexões' : [f'{percent_conexoes:.2f}%']
-        })
-
-
-
-
-    resultado_final = pd.concat([df_feito_total, df_importados, df_percent], ignore_index=True)
-
-    # Converter as colunas do DataFrame final para o formato numérico (excluindo a coluna 'Situação')
-
-    # Função para aplicar gráfico de barras apenas na l
-
-
-    st.write(resultado_final)
 
 with tab6:
     area_conexoes = ['SEP VAREJO CONEXOES']
@@ -776,7 +708,7 @@ with tab6:
 
     #Juntando os DF
     prod_conexoes = pd.concat([prod_conexoes, total_conexoes, data_conexoes])
-   
+
     prod_conexoes.index.name = "Usuário"
 
     st.write(prod_conexoes)
@@ -814,3 +746,91 @@ with tab6:
     plt.grid(True)
     plt.tight_layout()
     st.pyplot(plt)
+
+with tab5:
+ #QUANTIDADE DE APANHAS REALIZADAS
+    st.header('Expedição')
+
+    pedidos['Qtd. Tarefas'] = pd.to_numeric(pedidos['Qtd. Tarefas'], errors='coerce')
+
+    agrupado = pedidos.groupby(['Situação', 'Descrição (Area de Separacao)'])['Qtd. Tarefas'].sum().reset_index()
+
+    varejo = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO 01 - (PICKING)'].reset_index()
+
+
+
+    feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Aguardando conferência volumes','Aguardando conferência', 'Concluído']
+    varejo_feito = varejo[varejo['Situação'].isin(feito)].copy()
+    varejo_feito['Situação'] = 'Apanhas Realizadas'
+
+
+    confinado = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP CONFINADO'].reset_index()
+    confinado_feito = confinado[confinado['Situação'].isin(feito)].copy()
+    confinado_feito['Situação'] = 'Apanhas Realizadas'
+
+    conexoes = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO CONEXOES'].reset_index()
+    conexoes_feito = conexoes[conexoes['Situação'].isin(feito)].copy()
+    conexoes_feito['Situação'] = 'Apanhas Realizadas'
+
+    agrupado['Descrição (Area de Separacao)'] = agrupado['Descrição (Area de Separacao)'].apply(validar_e_substituir)
+    volumoso = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VOLUMOSO'].reset_index()
+    volumoso_feito = volumoso[volumoso['Situação'].isin(feito)].copy()
+    volumoso_feito['Situação'] = 'Apanhas Realizadas'
+
+
+    df_feito_total = pd.DataFrame({
+        'Situação': ['Apanhas Feitas'],
+        'Varejo': [int(varejo_feito['Qtd. Tarefas'].sum())],
+        'Confinado': [int(confinado_feito['Qtd. Tarefas'].sum())],
+        'Volumoso': [int(volumoso_feito['Qtd. Tarefas'].sum())],
+        'Conexões': [int(conexoes_feito['Qtd. Tarefas'].sum())]
+        })
+
+    df_importados = pd.DataFrame({
+        'Situação': ['Apanhas Importadas'],
+        'Varejo': [int(varejo['Qtd. Tarefas'].sum())],
+        'Confinado': [int(confinado['Qtd. Tarefas'].sum())],
+        'Volumoso': [int(volumoso['Qtd. Tarefas'].sum())] ,
+        'Conexões': [int(conexoes['Qtd. Tarefas'].sum())]
+
+        })
+    df_feito_total[['Varejo', 'Confinado', 'Volumoso', 'Conexões']] = df_feito_total[['Varejo', 'Confinado', 'Volumoso', 'Conexões']].apply(pd.to_numeric, errors='coerce')
+    df_importados[['Varejo', 'Confinado', 'Volumoso', 'Conexões']] = df_importados[['Varejo', 'Confinado', 'Volumoso', 'Conexões']].apply(pd.to_numeric, errors='coerce')
+
+    percent_varejo = (df_feito_total['Varejo'].values[0] / df_importados['Varejo'].values[0]) * 100
+    percent_confinado = (df_feito_total['Confinado'].values[0] / df_importados['Confinado'].values[0]) * 100
+    percent_volumoso = (df_feito_total['Volumoso'].values[0] / df_importados['Volumoso'].values[0]) * 100
+    percent_conexoes = (df_feito_total['Conexões'].values[0] / df_importados['Conexões'].values[0]) * 100
+
+    
+
+     # 3. Adicionar uma linha com as porcentagens
+    df_percent = pd.DataFrame({
+         'Situação': ['Porcentagem Feito'],
+         'Varejo': [f'{percent_varejo:.2f}%'],
+         'Confinado': [f'{percent_confinado:.2f}%'],
+         'Volumoso': [f'{percent_volumoso:.2f}%'],
+         'Conexões' : [f'{percent_conexoes:.2f}%']
+         })
+
+    df_pedidos = pd.DataFrame({
+        'Situação':['Pedidos Enviados para Separação'],
+        'Varejo': [status_varejo.loc['Enviado para separação'][0]],
+        'Confinado': [status_confinado.loc['Enviado para separação'][0]],
+        'Conexões': [status_conexoes.loc['Enviado para separação'][0]], 
+        'Volumoso': [status['Qtd_Ocs'].sum()]
+    })
+
+
+    resultado_final = pd.concat([df_feito_total, df_importados, df_percent, df_pedidos], ignore_index=True)
+
+    # Converter as colunas do DataFrame final para o formato numérico (excluindo a coluna 'Situação')
+
+    # Função para aplicar gráfico de barras apenas na l
+
+    # Supondo que 'resultado_final' seja seu DataFrame
+
+    st.write(resultado_final)
+
+
+
