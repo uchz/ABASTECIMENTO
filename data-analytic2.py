@@ -579,9 +579,9 @@ with tab3:
     meta_valores = []
     for hora in total_hora_data.index:
         if hora in ['19:00', '00:00', '01:00']:
-            meta_valores.append(675)  # Exemplo de meta nesses horários
+            meta_valores.append(621)  # Exemplo de meta nesses horários
         else:
-            meta_valores.append(1350)  # Exemplo de meta para os outros horários
+            meta_valores.append(1242)  # Exemplo de meta para os outros horários
 
 # Traçar a linha de meta
     plt.plot(total_hora_data.index, meta_valores, linestyle='--', color='blue', label='Meta')
@@ -1069,7 +1069,7 @@ with tab5:
 
 
 
-    feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Aguardando conferência volumes','Aguardando conferência', 'Concluído']
+    feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Aguardando conferência volumes','Aguardando conferência', 'Concluído', 'Pedido totalmente cortado']
     varejo_feito = varejo[varejo['Situação'].isin(feito)].copy()
     varejo_feito['Situação'] = 'Apanhas Realizadas'
 
@@ -1123,13 +1123,20 @@ with tab5:
          'Conexões' : [f'{percent_conexoes:.2f}%']
          })
 
+    def get_value(df, key):
+
+        return df.loc[key][0] if key in df.index else 0
+
+    # Construindo o DataFrame com tratamento de valores ausentes e chaves não existentes
     df_pedidos = pd.DataFrame({
-        'Situação':['Pedidos Enviados para Separação'],
-        'Varejo': [status_varejo.loc['Enviado para separação'][0]],
-        'Confinado': [status_confinado.loc['Enviado para separação'][0]],
-        'Conexões': [status_conexoes.loc['Enviado para separação'][0]], 
-        'Volumoso': [status['Qtd_Ocs'].sum()]
+        'Situação': ['Pedidos Enviados para Separação'],
+        'Varejo': [get_value(status_varejo, 'Enviado para separação')],
+        'Confinado': [get_value(status_confinado, 'Enviado para separação')],
+        'Conexões': [get_value(status_conexoes, 'Enviado para separação')],
+        'Volumoso': [status['Qtd_Ocs'].sum() if not pd.isna(status['Qtd_Ocs'].sum()) else 0]
     })
+
+    print(df_pedidos)
 
 
     resultado_final = pd.concat([df_feito_total, df_importados, df_percent, df_pedidos], ignore_index=True)
