@@ -171,7 +171,7 @@ df['Descrição (Area de Separacao)'] = df['Descrição (Area de Separacao)'].ap
 areas = df['Descrição (Area de Separacao)'].unique()
 
 # Criando um novo DataFrame dinâmico para conter a "O.C", todas as áreas e as colunas de conferência
-new_df = pd.DataFrame(columns=['O.C'] + list(areas) + ['Conferência Varejo', 'Conferência Confinado'])
+new_df = pd.DataFrame(columns=['O.C'] + list(areas) + ['Conferência Varejo', 'Conferência Confinado', 'Validação Varejo'])
 
 # Preenchendo o novo DataFrame
 rows = []
@@ -207,6 +207,13 @@ for oc in df['O.C'].unique():
     else:
         row['Conferência Confinado'] = 'Concluído'
     
+    # Verificando a situação para "Validação Varejo"
+    situacoes_validacao_varejo = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == 'CONFERENCIA VAREJO 1')]['Situação']
+    if situacoes_validacao_varejo.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência','Aguardando conferência volumes']).any():
+        row['Validação Varejo'] = 'Andamento'
+    else:
+        row['Validação Varejo'] = 'Concluído'
+    
     rows.append(row)
 
 # Criando o novo DataFrame a partir da lista de linhas
@@ -227,5 +234,4 @@ def colorize_cells(value):
 # Aplicando a estilização ao novo DataFrame
 styled_new_df = new_df.style.applymap(colorize_cells)
 
-# Exibindo o novo DataFrame estilizado
 st.write(styled_new_df)
