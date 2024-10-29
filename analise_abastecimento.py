@@ -468,3 +468,202 @@ labels = alt.Chart(df_full).mark_text(align='left', dx=5, dy=-5).encode(
 (points + labels + chart).interactive()
 
 # %%
+import pandas as pd
+
+# Criando um DataFrame a partir dos dados fornecidos
+data = {
+    'O.C': [0, 97154, 97154, 97154, 97129, 97129, 97129],
+    'Nro. Nota': [0, 0, 0, 3243126, 0, 0, 0],
+    'Qtd. Tarefas': [1, 2, 3, 1, 3, 2, 9],
+    'Conferente': ['CRISTIANEP', 'JONATANC', 'LEANDRO.ALBANO', 'JOAOC', 'LEANDRO.ALBANO', 'LEANDRO.ALBANO', 'LEANDRO.ALBANO'],
+    'Situação': ['Concluído', 'Concluído', 'Concluído', 'Concluído', 'Concluído', 'Concluído', 'Concluído'],
+    'Descrição (Área de Separação)': ['13', 'SEP TUBOS', 'SEP VOLUMES RUA 34', 'SEP VAREJO 01 - (PICKING)', 'SEP VOLUMES RUA 24', 'SEP VOLUMES RUA 21', 'SEP VOLUMES RUA 14'],
+    'Enviado p/ Doca': ['Sim', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim'],
+    'Descrição (Área de Conferência)': ['<SEM AREA>', '<SEM AREA>', '<SEM AREA>', 'CONFERENCIA VAREJO 1', '<SEM AREA>', '<SEM AREA>', '<SEM AREA>']
+}
+
+df = pd.DataFrame(data)
+
+# Função para estilizar a coluna "Situação"
+def colorize_situacao(situacao):
+    if situacao == 'Concluído':
+        return 'background-color: green'
+    elif situacao == 'Em Andamento':
+        return 'background-color: yellow'
+    else:  # Considera 'Pendente' ou qualquer outro status
+        return 'background-color: red'
+
+# Aplicando a estilização
+styled_df = df.style.applymap(colorize_situacao, subset=['Situação'])
+
+# Exibindo o DataFrame estilizado
+styled_df
+
+# %%
+import pandas as pd
+
+# Criando um DataFrame a partir dos dados fornecidos
+data = {
+    'O.C': [0, 97154, 97154, 97154, 97129, 97129, 97129],
+    'Nro. Nota': [0, 0, 0, 3243126, 0, 0, 0],
+    'Qtd. Tarefas': [1, 2, 3, 1, 3, 2, 9],
+    'Conferente': ['CRISTIANEP', 'JONATANC', 'LEANDRO.ALBANO', 'JOAOC', 'LEANDRO.ALBANO', 'LEANDRO.ALBANO', 'LEANDRO.ALBANO'],
+    'Situação': ['Concluído', 'Enviado para a separação', 'Processo de Separação', 'Concluído', 'Concluído', 'Concluído', 'Concluído'],
+    'Descrição (Área de Separação)': ['SEP VAREJO 01', 'SEP TUBOS', 'SEP VOLUMES RUA 34', 'SEP VAREJO 01 - (PICKING)', 'SEP VOLUMES RUA 24', 'SEP VOLUMES RUA 21', 'SEP VOLUMES RUA 14'],
+    'Enviado p/ Doca': ['Sim', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim'],
+    'Descrição (Área de Conferência)': ['<SEM AREA>', '<SEM AREA>', '<SEM AREA>', 'CONFERENCIA VAREJO 1', '<SEM AREA>', '<SEM AREA>', '<SEM AREA>']
+}
+
+df = pd.DataFrame(data)
+
+# Criando um novo DataFrame
+new_df = pd.DataFrame(columns=['O.C', 'SEP VAREJO', 'SEP TUBOS', 'SEP VOLUMES RUA 34'])
+
+# Preenchendo o novo DataFrame
+for oc in df['O.C'].unique():
+    row = {'O.C': oc}
+    for area in new_df.columns[1:]:
+        # Filtrando a situação para a O.C atual
+        situacoes = df[(df['O.C'] == oc) & (df['Descrição (Área de Separação)'] == area)]['Situação']
+        
+        # Verificando a situação
+        if situacoes.isin(['Enviado para a separação', 'Processo de Separação']).any():
+            row[area] = 'Amarelo'
+        else:
+            row[area] = 'Verde'
+    
+    new_df = new_df.append(row, ignore_index=True)
+
+# Função para estilizar o DataFrame
+def colorize_cells(value):
+    if value == 'Amarelo':
+        return 'background-color: yellow'
+    else:  # Verde
+        return 'background-color: green'
+
+# Aplicando a estilização ao novo DataFrame
+styled_new_df = new_df.style.applymap(colorize_cells)
+
+# Exibindo o novo DataFrame estilizado
+styled_new_df
+
+# %%
+import pandas as pd
+import numpy as np
+
+# Criando um DataFrame a partir dos dados fornecidos
+df = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
+
+df
+#%%
+
+
+# Criando um novo DataFrame
+new_df = pd.DataFrame(columns=['O.C', 'SEP VAREJO', 'SEP TUBOS', 'SEP VOLUMES RUA 34'])
+
+# Preenchendo o novo DataFrame
+rows = []  # Lista para armazenar as linhas a serem adicionadas
+
+for oc in df['O.C'].unique():
+    if pd.isna(oc):  # Verifica se o valor é NaN
+        continue  # Ignora se for NaN
+    row = {'O.C': int(oc)}  # Converte O.C para int
+    for area in new_df.columns[1:]:
+        # Filtrando a situação para a O.C atual
+        situacoes = df[(df['O.C'] == oc) & (df['Descrição (Area de Separacao)'] == area)]['Situação']
+        
+        # Verificando a situação
+        if situacoes.isin(['Enviado para a separação', 'Processo de Separação']).any():
+            row[area] = 'Andamento'
+        else:
+            row[area] = 'Concluído'
+    
+    rows.append(row)
+
+# Criando o novo DataFrame a partir da lista de linhas
+new_df = pd.DataFrame(rows)
+
+# Ordenando o DataFrame por O.C
+new_df.sort_values(by='O.C', inplace=True)
+
+# Resetando o índice após a ordenação
+new_df.reset_index(drop=True, inplace=True)
+
+# Função para estilizar o DataFrame
+def colorize_cells(value):
+    if value == 'Amarelo':
+        return 'background-color: yellow'
+    else:  # Verde
+        return 'background-color: green'
+
+# Aplicando a estilização ao novo DataFrame
+styled_new_df = new_df.style.applymap(colorize_cells)
+
+# Exibindo o novo DataFrame estilizado
+styled_new_df
+
+# %%
+import pandas as pd
+import numpy as np
+
+def validar_e_substituir(valor):
+    if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
+        return valor
+    else:
+        return 'SEP VOLUMOSO'
+    
+# Carregando a planilha com a primeira linha relevante como cabeçalho
+df = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
+
+df['Descrição (Area de Separacao)'] = df['Descrição (Area de Separacao)'].apply(validar_e_substituir)
+# Extraindo todas as áreas únicas da coluna "Descrição (Area de Separacao)"
+areas = df['Descrição (Area de Separacao)'].unique()
+
+
+
+# Criando um novo DataFrame dinâmico para conter a "O.C" e todas as áreas
+new_df = pd.DataFrame(columns=['O.C'] + list(areas))
+
+# Preenchendo o novo DataFrame
+rows = []
+
+for oc in df['O.C'].unique():
+    if pd.isna(oc):  # Verifica se o valor é NaN
+        continue
+    row = {'O.C': int(oc)}  # Converte O.C para int
+    for area in areas:
+        # Filtrando a situação para a O.C atual e a área específica
+        situacoes = df[(df['O.C'] == oc) & (df['Descrição (Area de Separacao)'] == area)]['Situação']
+        
+        # Definindo o status baseado nas situações encontradas
+        if situacoes.isin(['Enviado para a separação', 'Processo de Separação']).any():
+            row[area] = 'Andamento'
+        else:
+            situacoes.isin(['Concluído']).all()
+            row[area] = 'Concluído'
+
+    
+    rows.append(row)
+
+# Criando o novo DataFrame a partir da lista de linhas
+new_df = pd.DataFrame(rows)
+
+# Ordenando o DataFrame por O.C
+new_df.sort_values(by='O.C', inplace=True)
+new_df.reset_index(drop=True, inplace=True)
+
+# Função para estilizar o DataFrame com cores para cada status
+def colorize_cells(value):
+    if value == 'Andamento':
+        return 'background-color: red'
+    elif value == 'Concluído':
+        return 'background-color: green'
+    return ''
+
+# Aplicando a estilização ao novo DataFrame
+styled_new_df = new_df.style.applymap(colorize_cells)
+
+# Exibindo o novo DataFrame estilizado
+styled_new_df
+
+# %%
