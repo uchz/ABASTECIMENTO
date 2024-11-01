@@ -17,14 +17,13 @@ def validar_e_substituir(valor):
     else:
         return 'SEP VOLUMOSO'
 
-@st.cache_data
-def pedidos_varejo():
+
     
-    pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
+pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
-    return pedidos
 
-pedidos = pedidos_varejo()
+
+
 
 colunas = ['Nro. Nota', 'Conferente', 'Enviado p/ Doca', 'Descrição (Área de Conferência)', 'Nro. Sep.', 'Nro. Único',
             'Descrição (Doca do WMS)', 'Cód. Doca', 'Peso Bruto', 'M3 Bruto', 'Área', 'Cód. Emp OC', 'Cód. Área Sep', 'Triagem Realizada', 'Cod. Conferente' ]
@@ -57,7 +56,7 @@ status_varejo = status_var.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'coun
 area_varejo = ['SEP VAREJO 01 - (PICKING)']
 situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
 
-st.markdown("# Expedição 👷")
+st.markdown("# Expedição")
 
 
 pedidos['Qtd. Tarefas'] = pd.to_numeric(pedidos['Qtd. Tarefas'], errors='coerce')
@@ -188,28 +187,28 @@ for oc in df['O.C'].unique():
         # Define status da área de separação para "Andamento" ou "Concluído"
         if situacoes_separacao.isin(['Enviado para a separação', 'Processo de Separação']).any():
             row[area] = 'Andamento'
-        elif situacoes_separacao.isin(['Concluído', 'Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']).all():
+        elif situacoes_separacao.isin(['Concluído', 'Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes','Conferência validada', 'Conferência com divergência','Aguardando recontagem']).all():
             row[area] = 'Concluído'
         else:
             row[area] = 'Andamento'  # Caso haja outra situação que não seja "Concluído"
     
     # Verificando a situação para "Conferência Varejo"
     situacoes_conferencia_varejo = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == 'CONFERENCIA VAREJO 1')]['Situação']
-    if situacoes_conferencia_varejo.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência']).any():
+    if situacoes_conferencia_varejo.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência','Conferência com divergência']).any():
         row['Conferência Varejo'] = 'Andamento'
     else:
         row['Conferência Varejo'] = 'Concluído'
     
     # Verificando a situação para "Conferência Confinado"
     situacoes_conferencia_confinado = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == 'CONFERENCIA CONFINADO')]['Situação']
-    if situacoes_conferencia_confinado.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência']).any():
+    if situacoes_conferencia_confinado.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência', 'Conferência com divergência']).any():
         row['Conferência Confinado'] = 'Andamento'
     else:
         row['Conferência Confinado'] = 'Concluído'
     
     # Verificando a situação para "Validação Varejo"
     situacoes_validacao_varejo = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == 'CONFERENCIA VAREJO 1')]['Situação']
-    if situacoes_validacao_varejo.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência','Aguardando conferência volumes']).any():
+    if situacoes_validacao_varejo.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência','Aguardando conferência volumes','Conferência com divergência']).any():
         row['Validação Varejo'] = 'Andamento'
     else:
         row['Validação Varejo'] = 'Concluído'
@@ -233,5 +232,6 @@ def colorize_cells(value):
 
 # Aplicando a estilização ao novo DataFrame
 styled_new_df = new_df.style.applymap(colorize_cells)
+
 
 st.write(styled_new_df)

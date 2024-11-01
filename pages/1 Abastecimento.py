@@ -19,7 +19,7 @@ col1, col2 = st.columns(2)
 
 
 #Upload do arquivo de abastecimento
-@st.cache_data
+
 def abastecimento():
 
     df_abastecimento = pd.read_excel('abastecimento-por-oc.xls', header=2)
