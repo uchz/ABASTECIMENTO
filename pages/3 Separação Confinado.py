@@ -12,7 +12,7 @@ import numpy as np
 
 st.subheader('Separação Confinado')
 
-@st.cache_data
+
 def data_varejo():
     
     df_desempenho = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
@@ -26,7 +26,7 @@ colunas = ['Nro. Nota', 'Conferente', 'Enviado p/ Doca', 'Descrição (Área de 
 # Definindo fuso
 fuso_horario = 'America/Sao_Paulo'
 
-@st.cache_data
+
 def data():
     data_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%d-%m-%Y')
     hora_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%H:%M')
@@ -38,7 +38,7 @@ df_desempenho['Dt./Hora Inicial'] = pd.to_datetime(df_desempenho['Dt./Hora Inici
 df_desempenho['Hora'] = df_desempenho['Dt./Hora Inicial'].dt.hour
 df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.time
 
-@st.cache_data
+
 def pedidos_varejo():
     
     pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)

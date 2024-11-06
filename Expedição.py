@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression
 from datetime import datetime
 import numpy as np
 
-@st.cache_data
+
 def validar_e_substituir(valor):
     if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
         return valor
@@ -77,6 +77,7 @@ expedicao['O.C'] = expedicao['O.C'].astype(str)
 status = expedicao.groupby('Descrição (Area de Separacao)').agg(Qtd_Ocs = ('O.C', 'count'), OC = ('O.C', 'min')).reset_index()
 
 
+
 feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Aguardando conferência volumes','Aguardando conferência', 'Concluído', 'Pedido totalmente cortado']
 varejo_feito = varejo[varejo['Situação'].isin(feito)].copy()
 varejo_feito['Situação'] = 'Apanhas Realizadas'
@@ -89,7 +90,7 @@ confinado_feito['Situação'] = 'Apanhas Realizadas'
 # conexoes = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO CONEXOES'].reset_index()
 # conexoes_feito = conexoes[conexoes['Situação'].isin(feito)].copy()
 # conexoes_feito['Situação'] = 'Apanhas Realizadas'
-
+agrupado = agrupado.loc[agrupado['Descrição (Area de Separacao)'] != 'SEP TUBOS']
 agrupado['Descrição (Area de Separacao)'] = agrupado['Descrição (Area de Separacao)'].apply(validar_e_substituir)
 volumoso = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VOLUMOSO'].reset_index()
 volumoso_feito = volumoso[volumoso['Situação'].isin(feito)].copy()

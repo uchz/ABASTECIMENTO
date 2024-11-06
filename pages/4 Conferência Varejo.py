@@ -168,15 +168,15 @@ proxima_hora_float = ultima_hora + 1  # Adiciona 1 hora
 proxima_tarefa_prevista = model.predict([[proxima_hora_float]])
 
 # Adicionar a projeção ao DataFrame
-df_projecao = pd.DataFrame({
-    'Hora': [f'{int(proxima_hora_float)}:00'],
-    'Total': [proxima_tarefa_prevista[0]],
-    'Projecao': ['Sim']  # Indicando que esse valor é projetado
-})
+# df_projecao = pd.DataFrame({
+#     'Hora': [f'{int(proxima_hora_float)}:00'],
+#     'Total': [proxima_tarefa_prevista[0]],
+#     'Projecao': ['Sim']  # Indicando que esse valor é projetado
+# })
 
 # Combinar o DataFrame original com a projeção
 df_total['Projecao'] = 'Não'  # Indicando dados reais
-df_full = pd.concat([df_total, df_projecao], ignore_index=True)
+df_full = pd.concat([df_total], ignore_index=True)
 
 # Gráfico principal: Total de tarefas por hora
 grafico_total = alt.Chart(df_full).mark_line(point=True).encode(

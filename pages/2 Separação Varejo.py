@@ -13,7 +13,7 @@ import numpy as np
 
 st.subheader("Acompanhamento Separação Varejo")
 
-@st.cache_data
+
 def data_varejo():
     
     df_desempenho = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
@@ -27,7 +27,7 @@ colunas = ['Nro. Nota', 'Conferente', 'Enviado p/ Doca', 'Descrição (Área de 
 # Definindo fuso
 fuso_horario = 'America/Sao_Paulo'
 
-@st.cache_data
+
 def data():
     data_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%d-%m-%Y')
     hora_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%H:%M')
@@ -39,7 +39,7 @@ df_desempenho['Dt./Hora Inicial'] = pd.to_datetime(df_desempenho['Dt./Hora Inici
 df_desempenho['Hora'] = df_desempenho['Dt./Hora Inicial'].dt.hour
 df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.time
 
-@st.cache_data
+
 def pedidos_varejo():
     
     pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
@@ -207,7 +207,7 @@ plt.figure(figsize=(10, 6))
 plt.plot(df_total['Hora'], df_total['Total'], label='Tarefas Reais', color='black', marker='o')
 
 # Adicionar a projeção
-plt.plot(df_projecao['Hora'], df_projecao['Total'], label='Projeção', color='red', linestyle='--', marker='o')
+# plt.plot(df_projecao['Hora'], df_projecao['Total'], label='Projeção', color='red', linestyle='--', marker='o')
 meta_valores = []
 for hora in total_hora_data.index:
     if hora in ['19:00', '00:00', '01:00']:
@@ -222,12 +222,12 @@ plt.plot(total_hora_data.index, meta_valores, linestyle='--', color='blue', labe
 for i, txt in enumerate(df_total['Total']):
     plt.text(df_total['Hora'].iloc[i], df_total['Total'].iloc[i] + 0.2, f'{txt:.2f}', color='black')
 
-plt.plot([df_total['Hora'].iloc[-1], f'{int(proxima_hora_float)}:00'], 
-        [df_total['Total'].iloc[-1], proxima_tarefa_prevista[0]], 
-        label='Projeção', linestyle='--', marker='x', color='red')
+# plt.plot([df_total['Hora'].iloc[-1], f'{int(proxima_hora_float)}:00'], 
+#         [df_total['Total'].iloc[-1], proxima_tarefa_prevista[0]], 
+#         label='Projeção', linestyle='--', marker='x', color='red')
 
 # Adicionar rótulos para a projeção
-plt.text(df_projecao['Hora'].iloc[0], df_projecao['Total'].iloc[0] + 0.2, f'{df_projecao["Total"].iloc[0]:.2f}', color='red')
+#plt.text(df_projecao['Hora'].iloc[0], df_projecao['Total'].iloc[0] + 0.2, f'{df_projecao["Total"].iloc[0]:.2f}', color='red')
 
 # Configurar os rótulos e título do gráfico
 plt.xlabel('Hora')

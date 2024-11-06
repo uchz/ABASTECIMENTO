@@ -31,7 +31,7 @@ df_abastecimento = df_abastecimento[['CODPROD', 'DESCDESTINO', 'AREA DE SEPA END
 df_abastecimento = df_abastecimento.drop_duplicates(subset=['CODPROD', 'DESCDESTINO'])
 df_abastecimento.sort_values(by='DESCDESTINO', inplace=True)
 
-@st.cache_data
+
 def validar_e_substituir(valor):
     if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
         return valor
@@ -58,7 +58,7 @@ st.dataframe(abastecimento_area)
 st.title("Desempenho dos Operadores")
 
 # Carga e Processamento dos Dados de Desempenho dos Operadores
-@st.cache_data
+
 def data_abastecimento():
 
 
