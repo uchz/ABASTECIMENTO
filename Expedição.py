@@ -90,7 +90,7 @@ confinado_feito['Situação'] = 'Apanhas Realizadas'
 # conexoes = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO CONEXOES'].reset_index()
 # conexoes_feito = conexoes[conexoes['Situação'].isin(feito)].copy()
 # conexoes_feito['Situação'] = 'Apanhas Realizadas'
-# agrupado = agrupado.loc[agrupado['Descrição (Area de Separacao)'] != 'SEP TUBOS']
+agrupado = agrupado.loc[agrupado['Descrição (Area de Separacao)'] != 'SEP TUBOS']
 agrupado['Descrição (Area de Separacao)'] = agrupado['Descrição (Area de Separacao)'].apply(validar_e_substituir)
 volumoso = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VOLUMOSO'].reset_index()
 volumoso_feito = volumoso[volumoso['Situação'].isin(feito)].copy()
