@@ -1114,3 +1114,8 @@ styled_new_df = new_df.style.applymap(colorize_cells)
 styled_new_df
 
 # %%
+import pandas as pd
+
+df = pd.read_excel('archives/abastecimento-por-oc.xls')
+df
+# %%

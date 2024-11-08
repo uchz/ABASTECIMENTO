@@ -19,7 +19,7 @@ def validar_e_substituir(valor):
 
 
     
-pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
+pedidos = pd.read_excel('archives\Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
 
 
@@ -66,7 +66,7 @@ agrupado = pedidos.groupby(['Situação', 'Descrição (Area de Separacao)'])['Q
 varejo = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO 01 - (PICKING)'].reset_index()
 
 
-expedicao = pd.read_excel('Expedicao_de_Mercadorias.xls', header=2)
+expedicao = pd.read_excel('archives/Expedicao_de_Mercadorias.xls', header=2)
 
 expedicao.drop(columns=colunas, inplace=True)
 
@@ -164,7 +164,7 @@ def validar_e_substituir(valor):
         return 'SEP VOLUMOSO'
     
 # Carregando a planilha com a primeira linha relevante como cabeçalho
-df = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
+df = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
 # Substituindo valores na coluna "Descrição (Area de Separacao)"
 df['Descrição (Area de Separacao)'] = df['Descrição (Area de Separacao)'].apply(validar_e_substituir)

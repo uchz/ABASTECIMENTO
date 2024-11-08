@@ -22,7 +22,7 @@ col1, col2 = st.columns(2)
 
 def abastecimento():
 
-    df_abastecimento = pd.read_excel('abastecimento-por-oc.xls', header=2)
+    df_abastecimento = pd.read_excel('archives/abastecimento-por-oc.xls', header=2)
 
     return df_abastecimento
 
@@ -62,7 +62,7 @@ st.title("Desempenho dos Operadores")
 def data_abastecimento():
 
 
-    df_desempenho = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
+    df_desempenho = pd.read_excel('archives/Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
 
     return df_desempenho
 

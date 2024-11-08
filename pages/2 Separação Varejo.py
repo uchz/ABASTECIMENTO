@@ -21,7 +21,7 @@ def hora_para_float(hora_str):
 
 def data_varejo():
     
-    df_desempenho = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
+    df_desempenho = pd.read_excel('archives/Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
 
     return df_desempenho
 
@@ -47,7 +47,7 @@ df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.ti
 
 def pedidos_varejo():
     
-    pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
+    pedidos = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
     return pedidos
 
@@ -245,7 +245,7 @@ df_total = total_hora_data.reset_index()
 df_total.columns = ['Hora', 'Total']
 
 # Criar o DataFrame para a linha de meta
-meta_hora_filtrado = df_total[df_total['Hora'].isin(['20:00','21:00','22:00','23:00','00:00','01:00','02:00','03:00','04:00','05:00'])].copy()
+meta_hora_filtrado = df_total[df_total['Hora'].isin(['19:00','20:00','21:00','22:00','23:00','00:00','01:00','02:00','03:00','04:00','05:00'])].copy()
 
 meta_valores = []
 for hora in meta_hora_filtrado['Hora']:

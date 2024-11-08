@@ -22,7 +22,7 @@ fuso_horario = 'America/Sao_Paulo'
 
 def data_conf():
 
-    df_conf = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
+    df_conf = pd.read_excel('archives/Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
 
     return df_conf
 

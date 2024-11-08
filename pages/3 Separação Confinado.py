@@ -20,7 +20,7 @@ def hora_para_float(hora_str):
 
 def data_varejo():
     
-    df_desempenho = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
+    df_desempenho = pd.read_excel('archives/Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
 
     return df_desempenho
 
@@ -46,7 +46,7 @@ df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.ti
 
 def pedidos_varejo():
     
-    pedidos = pd.read_excel('Expedicao_de_Mercadorias_Varejo.xls', header=2)
+    pedidos = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
     return pedidos
 
