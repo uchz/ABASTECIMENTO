@@ -90,7 +90,7 @@ confinado_feito['Situação'] = 'Apanhas Realizadas'
 # conexoes = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VAREJO CONEXOES'].reset_index()
 # conexoes_feito = conexoes[conexoes['Situação'].isin(feito)].copy()
 # conexoes_feito['Situação'] = 'Apanhas Realizadas'
-agrupado = agrupado.loc[agrupado['Descrição (Area de Separacao)'] != 'SEP TUBOS']
+# agrupado = agrupado.loc[agrupado['Descrição (Area de Separacao)'] != 'SEP TUBOS']
 agrupado['Descrição (Area de Separacao)'] = agrupado['Descrição (Area de Separacao)'].apply(validar_e_substituir)
 volumoso = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VOLUMOSO'].reset_index()
 volumoso_feito = volumoso[volumoso['Situação'].isin(feito)].copy()
@@ -153,8 +153,9 @@ resultado_final = pd.concat([df_feito_total, df_importados, df_percent, df_pedid
 # Função para aplicar gráfico de barras apenas na l
 
 # Supondo que 'resultado_final' seja seu DataFrame
+resultado_final.set_index('Situação', inplace=True)
 
-st.write(resultado_final)
+st.dataframe(resultado_final)
 
 def validar_e_substituir(valor):
     if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
@@ -231,8 +232,11 @@ def colorize_cells(value):
         return 'background-color: green; color: white'
     return ''
 
+
 # Aplicando a estilização ao novo DataFrame
 styled_new_df = new_df.style.applymap(colorize_cells)
+
+
 
 
 st.write(styled_new_df)

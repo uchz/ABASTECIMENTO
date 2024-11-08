@@ -19,7 +19,7 @@ def hora_para_float(hora_str):
 
 fuso_horario = 'America/Sao_Paulo'
 
-@st.cache_data
+
 def data_conf():
 
     df_conf = pd.read_excel('Gestao_Produtividade_detalhada_WMS_2.xlsx', header=2)
@@ -29,7 +29,7 @@ def data_conf():
 df_conf = data_conf()
 
 #Função para trazer data e hora atualizada
-@st.cache_data
+
 def data ():
 
     data_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%d-%m-%Y')

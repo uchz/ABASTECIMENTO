@@ -73,7 +73,7 @@ df = df_desempenho
 # Definindo fuso
 fuso_horario = 'America/Sao_Paulo'
 
-@st.cache_data
+
 def data():
     data_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%d-%m-%Y')
     hora_atual = datetime.now(pytz.timezone(fuso_horario)).strftime('%H:%M')
