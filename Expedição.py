@@ -189,7 +189,7 @@ for oc in df['O.C'].unique():
         # Define status da área de separação para "Andamento" ou "Concluído"
         if situacoes_separacao.isin(['Enviado para a separação', 'Processo de Separação']).any():
             row[area] = 'Andamento'
-        elif situacoes_separacao.isin(['Concluído', 'Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes','Conferência validada', 'Conferência com divergência','Aguardando recontagem']).all():
+        elif situacoes_separacao.isin(['Concluído', 'Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes','Conferência validada', 'Conferência com divergência','Aguardando recontagem','Pedido totalmente cortado']).all():
             row[area] = 'Concluído'
         else:
             row[area] = 'Andamento'  # Caso haja outra situação que não seja "Concluído"
