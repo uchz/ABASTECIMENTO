@@ -312,3 +312,42 @@ st.write(styled_new_df)
 # with row2_col3:
 #     st.write("Linha 2, Coluna 3")
 
+# CSS para o estilo dos quadrados
+
+# Função para criar quadrados no layout
+def create_dashboard_row(df, col_labels):
+    cols = st.columns(len(col_labels))  # Cria colunas no layout
+    for idx, col in enumerate(col_labels):
+        with cols[idx]:
+            st.markdown(
+                f"""
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100px;
+                    width: 100%;
+                    background-color: #f4f4f4;
+                    border-radius: 10px;
+                    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: #333333;
+                    text-align: center;
+                    padding: 10px;">
+                    <div>{col}</div>
+                    <div>{df[col].iloc[0] if col in df.columns else "N/A"}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+# Listando DataFrames e colunas que serão exibidas
+dataframes = [df_importados,    df_feito_total, df_percent, df_pedidos]
+columns = [ "Varejo", "Confinado", "Volumoso"]
+
+st.title("Dashboard")
+for df in dataframes:
+    st.subheader(f"Dados de {df['Situação'].iloc[0]}")
+    create_dashboard_row(df, columns)
