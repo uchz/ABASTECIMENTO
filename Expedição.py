@@ -19,7 +19,7 @@ def validar_e_substituir(valor):
 
 
     
-pedidos = pd.read_excel('archives\\Expedicao_de_Mercadorias_Varejo.xls', header=2)
+pedidos = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
 
 
