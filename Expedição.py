@@ -329,4 +329,5 @@ for idx, (sector, total_completed) in enumerate(completed_by_sector.items()):
         )
 
 st.write('')
+st.divider()
 st.write(styled_new_df)
