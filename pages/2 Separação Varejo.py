@@ -250,9 +250,9 @@ meta_hora_filtrado = df_total[df_total['Hora'].isin(['19:00','20:00','21:00','22
 meta_valores = []
 for hora in meta_hora_filtrado['Hora']:
     if hora in ['19:00', '00:00', '01:00']:
-        meta_valores.append(750)  # Meta para horários específicos
+        meta_valores.append(836)  # Meta para horários específicos
     else:
-        meta_valores.append(1500)  # Meta para os outros horários
+        meta_valores.append(1672)  # Meta para os outros horários
 
 # Adicionar a coluna de meta no DataFrame
 meta_hora_filtrado['Meta'] = meta_valores

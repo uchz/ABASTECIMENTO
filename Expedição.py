@@ -9,7 +9,7 @@ import altair as alt
 from sklearn.linear_model import LinearRegression
 from datetime import datetime
 import numpy as np
-
+from streamlit_extras.grid import grid
 
 def validar_e_substituir(valor):
     if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
@@ -56,7 +56,7 @@ status_varejo = status_var.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'coun
 area_varejo = ['SEP VAREJO 01 - (PICKING)']
 situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
 
-st.markdown("# Expedição")
+# st.markdown("# Expedição")
 
 
 pedidos['Qtd. Tarefas'] = pd.to_numeric(pedidos['Qtd. Tarefas'], errors='coerce')
