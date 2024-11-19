@@ -9,7 +9,7 @@ import altair as alt
 from sklearn.linear_model import LinearRegression
 from datetime import datetime
 import numpy as np
-
+from streamlit_extras.grid import grid
 
 def validar_e_substituir(valor):
     if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
@@ -56,7 +56,7 @@ status_varejo = status_var.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'coun
 area_varejo = ['SEP VAREJO 01 - (PICKING)']
 situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
 
-st.markdown("# Expedição")
+# st.markdown("# Expedição")
 
 
 pedidos['Qtd. Tarefas'] = pd.to_numeric(pedidos['Qtd. Tarefas'], errors='coerce')
@@ -160,42 +160,80 @@ resultado_final.set_index('Situação', inplace=True)
 
 
 
-from streamlit_extras.grid import grid
-
-my_grid = grid(4, vertical_align='center')
 
 
-#SETORES E SITUAÇÃO
-my_grid.subheader(str(df_feito_total.columns[0]))
-my_grid.subheader(str(df_feito_total.columns[1]))
-my_grid.subheader(str(df_feito_total.columns[2]))
-my_grid.subheader(str(df_feito_total.columns[3]))
+# my_grid = grid(4, vertical_align='center')
 
-#SITUAÇÕES IMPORTADOS
-my_grid.subheader(df_importados['Situação'][0])
-my_grid.subheader(df_importados['Varejo'][0])
-my_grid.subheader(df_importados['Confinado'][0])
-my_grid.subheader(df_importados['Volumoso'][0])
 
-#SITUAÇÃO FEITOS
-my_grid.subheader(df_feito_total['Situação'][0])
-my_grid.subheader(df_feito_total['Varejo'][0])
-my_grid.subheader(df_feito_total['Confinado'][0])
-my_grid.subheader(df_feito_total['Volumoso'][0])
+# #SETORES E SITUAÇÃO
+# my_grid.subheader(str(df_feito_total.columns[0]))
+# my_grid.subheader(str(df_feito_total.columns[1]))
+# my_grid.subheader(str(df_feito_total.columns[2]))
+# my_grid.subheader(str(df_feito_total.columns[3]))
 
-#Situação porcentagem
+# #SITUAÇÕES IMPORTADOS
+# my_grid.subheader(df_importados['Situação'][0])
+# my_grid.subheader(df_importados['Varejo'][0])
+# my_grid.subheader(df_importados['Confinado'][0])
+# my_grid.subheader(df_importados['Volumoso'][0])
 
-my_grid.subheader(df_percent['Situação'][0])
-my_grid.subheader(df_percent['Varejo'][0])
-my_grid.subheader(df_percent['Confinado'][0])
-my_grid.subheader(df_percent['Volumoso'][0])
+# #SITUAÇÃO FEITOS
+# my_grid.subheader(df_feito_total['Situação'][0])
+# my_grid.subheader(df_feito_total['Varejo'][0])
+# my_grid.subheader(df_feito_total['Confinado'][0])
+# my_grid.subheader(df_feito_total['Volumoso'][0])
 
-#Situação Pedidos
+# #Situação porcentagem
 
-my_grid.subheader(df_pedidos['Situação'][0])
-my_grid.subheader(df_pedidos['Varejo'][0])
-my_grid.subheader(df_pedidos['Confinado'][0])
-my_grid.subheader(df_pedidos['Volumoso'][0])
+# my_grid.subheader(df_percent['Situação'][0])
+# my_grid.subheader(df_percent['Varejo'][0])
+# my_grid.subheader(df_percent['Confinado'][0])
+# my_grid.subheader(df_percent['Volumoso'][0])
+
+# #Situação Pedidos
+
+# my_grid.subheader(df_pedidos['Situação'][0])
+# my_grid.subheader(df_pedidos['Varejo'][0])
+# my_grid.subheader(df_pedidos['Confinado'][0])
+# my_grid.subheader(df_pedidos['Volumoso'][0])
+
+
+def create_dashboard_row(df, col_labels):
+    cols = st.columns(len(col_labels))  # Cria colunas no layout
+    for idx, col in enumerate(col_labels):
+        with cols[idx]:
+            st.markdown(
+                f"""
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100px;
+                    width: 100%;
+                    background-color: #f4f4f4;
+                    border-radius: 10px;
+                    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: #333333;
+                    text-align: center;
+                    padding: 10px;">
+                    <div>{col}</div>
+                    <div>{df[col].iloc[0] if col in df.columns else "N/A"}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+# Listando DataFrames e colunas que serão exibidas
+dataframes = [df_importados,    df_feito_total, df_percent, df_pedidos]
+columns = [ "Varejo", "Confinado", "Volumoso"]
+
+st.title("Expedição")
+for df in dataframes:
+    st.subheader(f"{df['Situação'].iloc[0]}")
+    create_dashboard_row(df, columns)
 
 
 st.divider()
@@ -234,7 +272,7 @@ for oc in df['O.C'].unique():
         
         # Define status da área de separação para "Andamento" ou "Concluído"
         if situacoes_separacao.isin(['Enviado para a separação', 'Processo de Separação']).any():
-            row[area] = 'Em Separação'
+            row[area] = 'Andamento'
         elif situacoes_separacao.isin(['Concluído', 'Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes','Conferência validada', 'Conferência com divergência','Aguardando recontagem','Pedido totalmente cortado']).all():
             row[area] = 'Concluído'
         else:
@@ -243,14 +281,14 @@ for oc in df['O.C'].unique():
     # Verificando a situação para "Conferência Varejo"
     situacoes_conferencia_varejo = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == 'CONFERENCIA VAREJO 1')]['Situação']
     if situacoes_conferencia_varejo.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência','Conferência com divergência']).any():
-        row['Conferência Varejo'] = 'Em Conferência'
+        row['Conferência Varejo'] = 'Andamento'
     else:
         row['Conferência Varejo'] = 'Concluído'
     
     # Verificando a situação para "Conferência Confinado"
     situacoes_conferencia_confinado = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == 'CONFERENCIA CONFINADO')]['Situação']
     if situacoes_conferencia_confinado.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência', 'Conferência com divergência']).any():
-        row['Conferência Confinado'] = 'Em Conferência'
+        row['Conferência Confinado'] = 'Andamento'
     else:
         row['Conferência Confinado'] = 'Concluído'
     
@@ -315,39 +353,3 @@ st.write(styled_new_df)
 # CSS para o estilo dos quadrados
 
 # Função para criar quadrados no layout
-def create_dashboard_row(df, col_labels):
-    cols = st.columns(len(col_labels))  # Cria colunas no layout
-    for idx, col in enumerate(col_labels):
-        with cols[idx]:
-            st.markdown(
-                f"""
-                <div style="
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100px;
-                    width: 100%;
-                    background-color: #f4f4f4;
-                    border-radius: 10px;
-                    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-                    font-size: 16px;
-                    font-weight: bold;
-                    color: #333333;
-                    text-align: center;
-                    padding: 10px;">
-                    <div>{col}</div>
-                    <div>{df[col].iloc[0] if col in df.columns else "N/A"}</div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-# Listando DataFrames e colunas que serão exibidas
-dataframes = [df_importados,    df_feito_total, df_percent, df_pedidos]
-columns = [ "Varejo", "Confinado", "Volumoso"]
-
-st.title("Dashboard")
-for df in dataframes:
-    st.subheader(f"Dados de {df['Situação'].iloc[0]}")
-    create_dashboard_row(df, columns)
