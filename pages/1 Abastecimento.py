@@ -55,7 +55,7 @@ abastecimento_area = abastecimento_area.set_index('Area')
 st.dataframe(abastecimento_area)
 
 
-st.title("Desempenho dos Operadores")
+# st.title("Desempenho dos Operadores")
 
 # Carga e Processamento dos Dados de Desempenho dos Operadores
 
@@ -99,8 +99,8 @@ contagem_tipos = df_desempenho.groupby(['Usuário', 'Tipo ']).size().unstack(fil
 contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
 contagem_tipos.loc['Total'] = contagem_tipos.sum()
 
-st.header('Abastecimentos por Empilhador')
-st.dataframe(contagem_tipos)
+# st.header('Abastecimentos por Empilhador')
+# st.dataframe(contagem_tipos)
 
 # with col1:
 #     st.write(abastecimento_area)
@@ -119,19 +119,6 @@ contagem_tipos = df_desempenho.groupby(['Usuário', 'Tipo ']).size().unstack(fil
 # Transformando os dados para formato long (necessário para Altair)
 df_long = contagem_tipos.reset_index().melt(id_vars='Usuário', var_name='Tipo', value_name='Quantidade')
 
-# Criando o gráfico de barras com Altair
-bar_chart = alt.Chart(df_long).mark_bar().encode(
-    x=alt.X('Usuário:N', title='Empilhador'),
-    y=alt.Y('Quantidade:Q', title='Quantidade'),
-    color=alt.Color('Tipo:N'),  # O Altair define automaticamente as cores
-).properties(
-    title='Abastecimentos por Empilhador'
-).configure_axis(
-    labelAngle=90  # Rotaciona os labels do eixo X
-)
-
-# Exibindo no Streamlit o gráfico sem a linha 'Total'
-st.altair_chart(bar_chart, use_container_width=True)
 
 # Exibindo a tabela completa, incluindo a linha 'Total'
 # st.write("Tabela de contagem com Totais:")
@@ -150,8 +137,8 @@ tarefas_pivot.loc['Total P/ Hora'] = sum_values
 tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
 tarefas_pivot['Total'] = tarefas_pivot['Total'].astype(int)
 
-st.subheader('Tarefas por Hora')
-st.write(tarefas_pivot)
+# st.subheader('Tarefas por Hora')
+#st.write(tarefas_pivot)
 
 
 
@@ -160,7 +147,7 @@ total_hora_data = tarefas_pivot.loc['Total P/ Hora']
 
 
 
-st.subheader('Evolução p/ Hora')
+# st.subheader('Evolução p/ Hora')
 
 plt.figure(figsize=(13, 7), dpi=800 )
 plt.plot(total_hora_data.index, total_hora_data.values, marker='o', linestyle='-', color='black', label='Total de Tarefas')
@@ -175,4 +162,58 @@ plt.xticks(rotation=45)
 plt.legend(loc='upper left')
 plt.grid(True)
 plt.tight_layout()
+#st.pyplot(plt)
+
+
+
+# Exibição do título
+st.title("Produtividade dos Empilhadores")
+
+# KPI Cards
+# st.subheader("Resumo Geral")
+kpi_cols = st.columns(2)
+
+with kpi_cols[0]:
+    st.metric("Total de Tarefas", f"{df_desempenho['Tipo '].count()}")
+
+with kpi_cols[1]:
+    st.metric("Produtividade Média", f"{tarefas_pivot.loc['Total P/ Hora'].mean():.1f} tarefas/hora")
+
+# Gráfico de Barras - Tarefas Concluídas
+
+st.write('')
+
+# Agrega os dados para calcular a soma total por empilhador
+df_totals = df_long.groupby("Usuário", as_index=False).agg({"Quantidade": "sum"})
+
+# Gráfico de barras empilhadas
+bar_chart = alt.Chart(df_long).mark_bar().encode(
+    x=alt.X("Usuário:N", title="Empilhador"),
+    y=alt.Y("Quantidade:Q", title="Quantidade"),
+    color=alt.Color("Tipo:N", title="Tipo de Abastecimento"),  # Define as cores
+).properties(
+    title="Abastecimentos por Empilhador"
+)
+
+# Rótulos com a soma total no topo de cada barra
+total_labels = alt.Chart(df_totals).mark_text(
+    align="center",  # Centraliza horizontalmente
+    baseline="bottom",  # Coloca os rótulos no topo
+    dy=-5,  # Ajusta a posição acima das barras
+    color='white'
+).encode(
+    x=alt.X("Usuário:N"),
+    y=alt.Y("Quantidade:Q"),
+    text=alt.Text("Quantidade:Q")  # Mostra a soma total como texto
+)
+
+# Combina o gráfico de barras com os rótulos
+final_chart = bar_chart + total_labels
+
+# Exibe o gráfico
+st.altair_chart(final_chart, use_container_width=True)
+
+
+
 st.pyplot(plt)
+
