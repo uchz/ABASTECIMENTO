@@ -145,9 +145,9 @@ meta_hora_filtrado = df_total[df_total['Hora'].isin(['20:00','21:00','22:00','23
 meta_valores = []
 for hora in meta_hora_filtrado['Hora']:
     if hora in ['20:00', '00:00', '01:00']:
-        meta_valores.append(750)  # Meta para horários específicos
+        meta_valores.append(997)  # Meta para horários específicos
     else:
-        meta_valores.append(1500)  # Meta para os outros horários
+        meta_valores.append(1995)  # Meta para os outros horários
 
 # Adicionar a coluna de meta no DataFrame
 meta_hora_filtrado['Meta'] = meta_valores
@@ -290,9 +290,21 @@ kpi_cols = st.columns(2)
 
 with kpi_cols[0]:
     st.metric("Total de Tarefas", f"{prod_conferencia.loc['Total'][0]}")
-
+    
+meta = 1500
 with kpi_cols[1]:
     st.metric("Produtividade Média", f"{tarefas_pivot.loc['Total P/ Hora'].mean():.1f} tarefas/hora")
+
+    # Lógica para verificar se a produtividade está acima ou abaixo da meta
+    if tarefas_pivot.loc['Total P/ Hora'].mean() >= meta_valores[0]:
+        emoji = "✅"  # Indicador de sucesso (acima ou igual à meta)
+        status = "Acima da meta"
+    else:
+        emoji = "❌"  # Indicador de falha (abaixo da meta)
+        status = "Abaixo da meta"
+
+    # Exibição da meta abaixo da produtividade média
+    st.markdown(f" Meta: {meta} tarefas/hora<small>{emoji}", unsafe_allow_html=True)
 
 # Gráfico de Barras - Tarefas Concluídas
 
@@ -308,8 +320,8 @@ df_apanhas = df_apanhas.sort_values(by='Quantidade', ascending=False)
 df_totals = df_totals.sort_values(by='Quantidade', ascending=False)
 
 # Gráfico de barras empilhadas
-bar_chart = alt.Chart(df_apanhas).mark_bar().encode(
-    x=alt.X("Usuário:N" ,title="Conferente", sort=user_order),
+bar_chart = alt.Chart(df_apanhas).mark_bar(color='orangered').encode(
+    x=alt.X("Usuário:N" ,title="Conferentes", sort=user_order),
     y=alt.Y("Quantidade:Q", title="Quantidade"),  # Define as cores
 ).properties(
     title="Produtividade Conferência"
@@ -330,6 +342,7 @@ total_labels = alt.Chart(df_totals).mark_text(
 # Combina o gráfico de barras com os rótulos
 final_chart = bar_chart + total_labels
 
+final_chart = final_chart.properties(width=400, height=500)
 # Exibe o gráfico
 st.altair_chart(final_chart, use_container_width=True)
 
