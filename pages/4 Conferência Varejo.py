@@ -182,7 +182,7 @@ df_full = pd.concat([df_total], ignore_index=True)
 grafico_total = alt.Chart(df_full).mark_line(point=True).encode(
     x=alt.X('Hora:N', sort=None, title='Hora'),
     y=alt.Y('Total:Q', title='Total de Tarefas'),
-    color=alt.Color('Projecao:N', legend=None, scale=alt.Scale(domain=['Não', 'Sim'], range=['black', 'red'])),  # Diferença visual entre real e projetado
+    color=alt.Color('Projecao:N', legend=None, scale=alt.Scale(domain=['Não', 'Sim'], range=['orange', 'red'])),  # Diferença visual entre real e projetado
     tooltip=['Hora', 'Total']
 ).properties(
     title='Total de Apanhas por Hora',
@@ -199,18 +199,21 @@ color='red'
     tooltip=['Hora', 'Total']
 )
 # Rótulos dos dados no gráfico de total de tarefas
-rotulos_total = alt.Chart(df_full).mark_text(align='left', dx=5, dy=-5, color='black').encode(
+rotulos_total = alt.Chart(df_full).mark_text(align='left', dx=5, dy=-5, color='white').encode(
     x=alt.X('Hora:N', sort=None),
     y=alt.Y('Total:Q'),
-    text=alt.Text('Total:Q')
+    text=alt.Text('Total:Q'),
+
+
 )
 
 # Gráfico da meta
-grafico_meta = alt.Chart(meta_hora_filtrado).mark_line(strokeDash=[5, 5], color='blue').encode(
+grafico_meta = alt.Chart(meta_hora_filtrado).mark_line(strokeDash=[5, 5], color='red').encode(
     x=alt.X('Hora:N', sort=None, title='Hora'),
     y=alt.Y('Meta:Q'),
     tooltip=['Hora', 'Meta']
 )
+
 
 # Combinar ambos os gráficos (total de tarefas e meta), incluindo rótulos e projeção
 grafico_final = (grafico_total + linha_pontilhada + rotulos_total + grafico_meta )
@@ -247,7 +250,7 @@ df_full = pd.concat([df_total, df_projecao], ignore_index=True)  # Unindo os dad
 chart = alt.Chart(df_full).mark_line().encode(
     x='Hora',
     y='Tarefas',
-    color='Tipo'
+    color='Tipo',
 ).properties(
     title='Projeção de Tarefas para a Próxima Hora'
 )
@@ -267,3 +270,68 @@ labels = alt.Chart(df_full).mark_text(align='left', dx=5, dy=-5).encode(
 
 # Exibir o gráfico com os rótulos
 (points + labels + chart).interactive()
+
+
+#contagem_tipos = prod_conferencia.groupby(['Usuário', 'Pedidos']).size().unstack(fill_value=0)
+
+
+# Transformando os dados para formato long (necessário para Altair)
+df_long = prod_conferencia.reset_index().melt(id_vars='Usuário', var_name='Pedidos', value_name='Quantidade')
+
+df_apanhas = df_long[(df_long['Pedidos'] == 'Apanhas') & (df_long['Usuário'] != 'Total') & (df_long['Usuário'] != 'Data')]
+
+user_order = df_apanhas['Usuário'].tolist()
+
+st.title("Produtividade da Conferência")
+
+# KPI Cards
+# st.subheader("Resumo Geral")
+kpi_cols = st.columns(2)
+
+with kpi_cols[0]:
+    st.metric("Total de Tarefas", f"{prod_conferencia.loc['Total'][0]}")
+
+with kpi_cols[1]:
+    st.metric("Produtividade Média", f"{tarefas_pivot.loc['Total P/ Hora'].mean():.1f} tarefas/hora")
+
+# Gráfico de Barras - Tarefas Concluídas
+
+st.write('')
+
+# Agrega os dados para calcular a soma total por empilhador
+df_totals = df_apanhas.groupby("Usuário", as_index=False).agg({"Quantidade": "sum"})
+
+df_totals['Quantidade'] = df_totals['Quantidade'].astype(int)
+df_apanhas['Quantidade'] = df_apanhas['Quantidade'].astype(int)
+
+df_apanhas = df_apanhas.sort_values(by='Quantidade', ascending=False)
+df_totals = df_totals.sort_values(by='Quantidade', ascending=False)
+
+# Gráfico de barras empilhadas
+bar_chart = alt.Chart(df_apanhas).mark_bar().encode(
+    x=alt.X("Usuário:N" ,title="Conferente", sort=user_order),
+    y=alt.Y("Quantidade:Q", title="Quantidade"),  # Define as cores
+).properties(
+    title="Produtividade Conferência"
+)
+
+# Rótulos com a soma total no topo de cada barra
+total_labels = alt.Chart(df_totals).mark_text(
+    align="center",  # Centraliza horizontalmente
+    baseline="bottom",  # Coloca os rótulos no topo
+    dy=-5,  # Ajusta a posição acima das barras
+    color='white'
+).encode(
+    x=alt.X("Usuário:N", sort=user_order),
+    y=alt.Y("Quantidade:Q"),
+    text=alt.Text("Quantidade:Q")  # Mostra a soma total como texto
+)
+
+# Combina o gráfico de barras com os rótulos
+final_chart = bar_chart + total_labels
+
+# Exibe o gráfico
+st.altair_chart(final_chart, use_container_width=True)
+
+df_apanhas
+

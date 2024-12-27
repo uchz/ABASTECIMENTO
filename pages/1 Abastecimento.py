@@ -100,7 +100,7 @@ contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
 contagem_tipos.loc['Total'] = contagem_tipos.sum()
 
 # st.header('Abastecimentos por Empilhador')
-# st.dataframe(contagem_tipos)
+st.dataframe(contagem_tipos)
 
 # with col1:
 #     st.write(abastecimento_area)

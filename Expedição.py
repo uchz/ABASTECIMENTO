@@ -18,7 +18,8 @@ def validar_e_substituir(valor):
         return 'SEP VOLUMOSO'
 
 
-    
+st.header('Expedição')
+
 pedidos = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
 
@@ -78,7 +79,7 @@ status = expedicao.groupby('Descrição (Area de Separacao)').agg(Qtd_Ocs = ('O.
 
 
 
-feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Aguardando conferência volumes','Aguardando conferência', 'Concluído', 'Pedido totalmente cortado']
+feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Pedido parcialmente cortado','Aguardando conferência volumes','Aguardando conferência', 'Concluído', 'Pedido totalmente cortado']
 varejo_feito = varejo[varejo['Situação'].isin(feito)].copy()
 varejo_feito['Situação'] = 'Apanhas Realizadas'
 
@@ -204,7 +205,7 @@ st.divider()
 
 
 def validar_e_substituir(valor):
-    if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
+    if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES', 'SEP TUBOS']:
         return valor
     else:
         return 'SEP VOLUMOSO'
@@ -235,7 +236,7 @@ for oc in df['O.C'].unique():
         # Define status da área de separação para "Andamento" ou "Concluído"
         if situacoes_separacao.isin(['Enviado para a separação', 'Processo de Separação']).any():
             row[area] = 'Andamento'
-        elif situacoes_separacao.isin(['Concluído', 'Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes','Conferência validada', 'Conferência com divergência','Aguardando recontagem','Pedido totalmente cortado']).all():
+        elif situacoes_separacao.isin(['Concluído','Pedido parcialmente cortado', 'Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes','Conferência validada', 'Conferência com divergência','Aguardando recontagem','Pedido totalmente cortado']).all():
             row[area] = 'Concluído'
         else:
             row[area] = 'Andamento'  # Caso haja outra situação que não seja "Concluído"
@@ -293,6 +294,8 @@ styled_new_df = new_df.style.applymap(colorize_cells)
 
 
 st.header("Acompanhamento das OC's")
+
+
 
 st.markdown("#### Total de OC's Concluídas por Setor")
 
