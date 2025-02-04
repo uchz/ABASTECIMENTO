@@ -289,22 +289,22 @@ st.title("Produtividade da Conferência")
 kpi_cols = st.columns(2)
 
 with kpi_cols[0]:
-    st.metric("Total de Tarefas", f"{prod_conferencia.loc['Total'][0]}")
+    st.metric("Total de Apanhas Conferidas", f"{prod_conferencia.loc['Total'][0]}")
     
-meta = 1500
+
 with kpi_cols[1]:
-    st.metric("Produtividade Média", f"{tarefas_pivot.loc['Total P/ Hora'].mean():.1f} tarefas/hora")
+    st.metric("Produtividade Média da Equipe p/ Hora", f"{tarefas_pivot.loc['Total P/ Hora'].mean():.1f} tarefas/hora")
 
-    # Lógica para verificar se a produtividade está acima ou abaixo da meta
-    if tarefas_pivot.loc['Total P/ Hora'].mean() >= meta_valores[0]:
-        emoji = "✅"  # Indicador de sucesso (acima ou igual à meta)
-        status = "Acima da meta"
-    else:
-        emoji = "❌"  # Indicador de falha (abaixo da meta)
-        status = "Abaixo da meta"
+    # # Lógica para verificar se a produtividade está acima ou abaixo da meta
+    # if tarefas_pivot.loc['Total P/ Hora'].mean() >= meta_valores[1]:
+    #     emoji = "✅"  # Indicador de sucesso (acima ou igual à meta)
+    #     status = "Acima da meta"
+    # else:
+    #     emoji = "❌"  # Indicador de falha (abaixo da meta)
+    #     status = "Abaixo da meta"
 
-    # Exibição da meta abaixo da produtividade média
-    st.markdown(f" Meta: {meta} tarefas/hora<small>{emoji}", unsafe_allow_html=True)
+    # # Exibição da meta abaixo da produtividade média
+    # st.markdown(f" Meta: {meta_valores[1]} tarefas/hora<small>{emoji}", unsafe_allow_html=True)
 
 # Gráfico de Barras - Tarefas Concluídas
 
@@ -332,7 +332,7 @@ total_labels = alt.Chart(df_totals).mark_text(
     align="center",  # Centraliza horizontalmente
     baseline="bottom",  # Coloca os rótulos no topo
     dy=-5,  # Ajusta a posição acima das barras
-    color='white'
+    color='black'
 ).encode(
     x=alt.X("Usuário:N", sort=user_order),
     y=alt.Y("Quantidade:Q"),
@@ -346,5 +346,4 @@ final_chart = final_chart.properties(width=400, height=500)
 # Exibe o gráfico
 st.altair_chart(final_chart, use_container_width=True)
 
-df_apanhas
 

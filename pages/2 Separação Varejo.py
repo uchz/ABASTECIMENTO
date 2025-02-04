@@ -372,3 +372,74 @@ labels = alt.Chart(df_full).mark_text(align='left', dx=5, dy=-5).encode(
 
 # Exibir o gráfico com os rótulos
 (points + labels + chart).interactive()
+
+
+df_long = prod_varejo.reset_index().melt(id_vars='Usuário', var_name='Pedidos', value_name='Quantidade')
+
+df_apanhas = df_long[(df_long['Pedidos'] == 'Apanhas') & (df_long['Usuário'] != 'Total') & (df_long['Usuário'] != 'Data')]
+
+user_order = df_apanhas['Usuário'].tolist()
+
+st.title("Produtividade da Separação")
+
+# KPI Cards
+# st.subheader("Resumo Geral")
+kpi_cols = st.columns(2)
+
+with kpi_cols[0]:
+    st.metric("Total de Apanhas Separadas", f"{prod_varejo.loc['Total'][0]}")
+    
+meta = 1500
+with kpi_cols[1]:
+    st.metric("Produtividade Média da Equipe p/Hora ", f"{tarefas_pivot_var.loc['Total P/ Hora'].mean():.1f} apanha/hora")
+
+    # Lógica para verificar se a produtividade está acima ou abaixo da meta
+    # if tarefas_pivot_var.loc['Total P/ Hora'].mean() >= meta_valores[0]:
+    #     emoji = "✅"  # Indicador de sucesso (acima ou igual à meta)
+    #     status = "Acima da meta"
+    # else:
+    #     emoji = "❌"  # Indicador de falha (abaixo da meta)
+    #     status = "Abaixo da meta"
+
+    # Exibição da meta abaixo da produtividade média
+    #st.markdown(f" Meta: {meta} tarefas/hora<small>{emoji}", unsafe_allow_html=True)
+
+# Gráfico de Barras - Tarefas Concluídas
+
+st.write('')
+
+# Agrega os dados para calcular a soma total por empilhador
+df_totals = df_apanhas.groupby("Usuário", as_index=False).agg({"Quantidade": "sum"})
+
+df_totals['Quantidade'] = df_totals['Quantidade'].astype(int)
+df_apanhas['Quantidade'] = df_apanhas['Quantidade'].astype(int)
+
+df_apanhas = df_apanhas.sort_values(by='Quantidade', ascending=False)
+df_totals = df_totals.sort_values(by='Quantidade', ascending=False)
+
+# Gráfico de barras empilhadas
+bar_chart = alt.Chart(df_apanhas).mark_bar(color='orangered').encode(
+    x=alt.X("Usuário:N" ,title="Separadores", sort=user_order),
+    y=alt.Y("Quantidade:Q", title="Quantidade"),  # Define as cores
+).properties(
+    title="Produtividade Separação"
+)
+
+# Rótulos com a soma total no topo de cada barra
+total_labels = alt.Chart(df_totals).mark_text(
+    align="center",  # Centraliza horizontalmente
+    baseline="bottom",  # Coloca os rótulos no topo
+    dy=-5,  # Ajusta a posição acima das barras
+    color='white'
+).encode(
+    x=alt.X("Usuário:N", sort=user_order),
+    y=alt.Y("Quantidade:Q"),
+    text=alt.Text("Quantidade:Q")  # Mostra a soma total como texto
+)
+
+# Combina o gráfico de barras com os rótulos
+final_chart = bar_chart + total_labels
+
+final_chart = final_chart.properties(width=400, height=500)
+# Exibe o gráfico
+st.altair_chart(final_chart, use_container_width=True)

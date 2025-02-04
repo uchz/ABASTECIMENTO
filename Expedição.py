@@ -177,7 +177,7 @@ def create_dashboard_row(df, col_labels):
                     background-color: #f4f4f4;
                     border-radius: 10px;
                     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-                    font-size: 16px;
+                    font-size: 20px;
                     font-weight: bold;
                     color: #333333;
                     text-align: center;
@@ -291,13 +291,15 @@ new_df = new_df.rename(columns={'SEP CONFINADO' : 'Sep Confinado'})
 
 # Aplicando a estilização ao novo DataFrame
 styled_new_df = new_df.style.applymap(colorize_cells)
-
+total_ocs = new_df['Sep Volumoso'].count()
 
 st.header("Acompanhamento das OC's")
 
 
 
 st.markdown("#### Total de OC's Concluídas por Setor")
+
+st.write("## Total de OC's ", total_ocs - 1)
 
 completed_by_sector = new_df.drop(columns=['O.C']).apply(lambda col: (col == 'Concluído').sum())
 
@@ -317,13 +319,13 @@ for idx, (sector, total_completed) in enumerate(completed_by_sector.items()):
                 height: 100px;
                 width: 100%;
                 background-color: #f4f4f4;
-                border-radius: 10px;
-                box-shadow: 3px 3Px 10px rgba(0, 0, 0, 0.1);
-                font-size: 15px;
+                border-radius: 15px;
+                box-shadow: 3px 3Px 20px rgba(0, 0, 0, 0.1);
+                font-size: 14px;
                 font-weight: bold;
                 color: #333333;
                 text-align: center;
-                padding: 10px;">
+                padding: 16px;">
                 <div>{sector}</div>
                 <div>{total_completed}</div>
             </div>
