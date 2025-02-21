@@ -22,7 +22,7 @@ st.header('Expedição')
 
 pedidos = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
-
+st.write(pedidos['Situação'].unique())
 
 
 
@@ -54,6 +54,17 @@ status_var['O.C'] = status_var['O.C'].astype(str)
 
 status_varejo = status_var.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
 
+area_conferencia = ['CONFERENCIA VAREJO 1']
+situacao = ['Aguardando conferência']
+
+status_confe = pedidos[pedidos['Descrição (Área de Conferência)'].isin(area_conferencia)]
+status_confe = status_confe[status_confe['Situação'].isin(situacao)]
+
+status_confe['O.C'] = status_confe['O.C'].astype(int)
+status_confe['O.C'] = status_confe['O.C'].astype(str)
+
+status_conferencia = status_confe.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
+st.write(status_conferencia)
 area_varejo = ['SEP VAREJO 01 - (PICKING)']
 situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
 
@@ -98,12 +109,19 @@ volumoso_feito = volumoso[volumoso['Situação'].isin(feito)].copy()
 volumoso_feito['Situação'] = 'Apanhas Realizadas'
 
 
+feito = ['Aguardando conferência volumes','Concluído', 'Conferência validada','Pedido totalmente cortado']
+conferencia = pedidos[pedidos['Descrição (Área de Conferência)'] == 'CONFERENCIA VAREJO 1'].reset_index()
+conf_varejo_feito = conferencia[conferencia['Situação'].isin(feito)].copy()
+conf_varejo_feito['Situação'] = 'Apanhas Realizadas'
+
+
+
 df_feito_total = pd.DataFrame({
     'Situação': ['Apanhas Feitas'],
     'Varejo': [int(varejo_feito['Qtd. Tarefas'].sum())],
     'Confinado': [int(confinado_feito['Qtd. Tarefas'].sum())],
     'Volumoso': [int(volumoso_feito['Qtd. Tarefas'].sum())],
-    # 'Conexões': [int(conexoes_feito['Qtd. Tarefas'].sum())]
+    'Conferência': [int(conf_varejo_feito['Qtd. Tarefas'].sum())]
     })
 
 df_importados = pd.DataFrame({
@@ -111,16 +129,16 @@ df_importados = pd.DataFrame({
     'Varejo': [int(varejo['Qtd. Tarefas'].sum())],
     'Confinado': [int(confinado['Qtd. Tarefas'].sum())],
     'Volumoso': [int(volumoso['Qtd. Tarefas'].sum())] ,
-    # 'Conexões': [int(conexoes['Qtd. Tarefas'].sum())]
+    'Conferência': [int(conferencia['Qtd. Tarefas'].sum())]
 
     })
-df_feito_total[['Varejo', 'Confinado', 'Volumoso', ]] = df_feito_total[['Varejo', 'Confinado', 'Volumoso']].apply(pd.to_numeric, errors='coerce')
-df_importados[['Varejo', 'Confinado', 'Volumoso', ]] = df_importados[['Varejo', 'Confinado', 'Volumoso']].apply(pd.to_numeric, errors='coerce')
+df_feito_total[['Varejo', 'Confinado', 'Volumoso','Conferência',]] = df_feito_total[['Varejo', 'Confinado', 'Volumoso', 'Conferência']].apply(pd.to_numeric, errors='coerce')
+df_importados[['Varejo', 'Confinado', 'Volumoso', 'Conferência', ]] = df_importados[['Varejo', 'Confinado', 'Volumoso', 'Conferência']].apply(pd.to_numeric, errors='coerce')
 
 percent_varejo = (df_feito_total['Varejo'].values[0] / df_importados['Varejo'].values[0]) * 100
 percent_confinado = (df_feito_total['Confinado'].values[0] / df_importados['Confinado'].values[0]) * 100
 percent_volumoso = (df_feito_total['Volumoso'].values[0] / df_importados['Volumoso'].values[0]) * 100
-
+percent_conferencia = (df_feito_total['Conferência'].values[0] / df_importados['Conferência'].values[0]) * 100
 
 
 
@@ -130,6 +148,7 @@ df_percent = pd.DataFrame({
         'Varejo': [f'{percent_varejo:.2f}%'],
         'Confinado': [f'{percent_confinado:.2f}%'],
         'Volumoso': [f'{percent_volumoso:.2f}%'],
+        'Conferência': [f'{percent_conferencia:.2f}%'],
         
         })
 
@@ -137,17 +156,28 @@ def get_value(df, key):
 
     return df.loc[key][0] if key in df.index else 0
 
+
+aguard_conf = conferencia[conferencia['Situação'] == 'Aguardando conferência']
 # Construindo o DataFrame com tratamento de valores ausentes e chaves não existentes
 df_pedidos = pd.DataFrame({
     'Situação': ['Enviados para Separação'],
     'Varejo': [get_value(status_varejo, 'Enviado para separação')],
     'Confinado': [get_value(status_confinado, 'Enviado para separação')],
-    'Volumoso': [status['Qtd_Ocs'].sum() if not pd.isna(status['Qtd_Ocs'].sum()) else 0]
+    'Volumoso': [status['Qtd_Ocs'].sum() if not pd.isna(status['Qtd_Ocs'].sum()) else 0],
+    'Conferência': [get_value(status_conferencia, 'Aguardando conferência')],
+    
 })
 
+df_confe = pd.DataFrame({
+    'Situação': ['Aguardando conferência'],
+    'Varejo': [get_value(status_varejo, 'Enviado para separação')],
+    'Confinado': [get_value(status_confinado, 'Enviado para separação')],
+    'Volumoso': [status['Qtd_Ocs'].sum() if not pd.isna(status['Qtd_Ocs'].sum()) else 0],
+    'Conferência': [get_value(status_conferencia, 'Aguardando conferência')],
 
+})
 
-resultado_final = pd.concat([df_feito_total, df_importados, df_percent, df_pedidos], ignore_index=True)
+resultado_final = pd.concat([df_feito_total, df_importados, df_percent, df_pedidos, df_confe], ignore_index=True)
 
 
 # Converter as colunas do DataFrame final para o formato numérico (excluindo a coluna 'Situação')
@@ -190,14 +220,14 @@ def create_dashboard_row(df, col_labels):
             )
 
 # Listando DataFrames e colunas que serão exibidas
-dataframes = [df_importados,    df_feito_total, df_percent, df_pedidos]
-columns = [ "Varejo", "Confinado", "Volumoso"]
+dataframes = [df_importados,    df_feito_total, df_percent, df_pedidos, df_confe]
+columns = [ "Varejo", "Confinado", "Volumoso","Conferência"]
 
 
 for df in dataframes:
     st.markdown(f"### **{df['Situação'].iloc[0]}**")
     create_dashboard_row(df, columns)
-
+    
 
 st.divider()
 st.divider()
@@ -290,8 +320,9 @@ new_df = new_df.rename(columns={'SEP VAREJO 01 - (PICKING)' : 'Sep Varejo'})
 new_df = new_df.rename(columns={'SEP CONFINADO' : 'Sep Confinado'})
 
 # Aplicando a estilização ao novo DataFrame
+new_df = new_df[['O.C', 'Sep Varejo','Conferência Varejo', 'Validação Varejo', 'Sep Confinado', 'Validação Confinado']]
 styled_new_df = new_df.style.applymap(colorize_cells)
-total_ocs = new_df['Sep Volumoso'].count()
+total_ocs = new_df['Sep Varejo'].count()
 
 st.header("Acompanhamento das OC's")
 
@@ -299,7 +330,7 @@ st.header("Acompanhamento das OC's")
 
 st.markdown("#### Total de OC's Concluídas por Setor")
 
-st.write("## Total de OC's ", total_ocs - 1)
+st.write("## Total de OC's ", total_ocs - 2)
 
 completed_by_sector = new_df.drop(columns=['O.C']).apply(lambda col: (col == 'Concluído').sum())
 
@@ -327,7 +358,7 @@ for idx, (sector, total_completed) in enumerate(completed_by_sector.items()):
                 text-align: center;
                 padding: 16px;">
                 <div>{sector}</div>
-                <div>{total_completed}</div>
+                <div>{total_completed - 2}</div>
             </div>
             """,
             unsafe_allow_html=True
