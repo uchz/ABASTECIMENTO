@@ -177,7 +177,7 @@ df_confe = pd.DataFrame({
 
 })
 
-resultado_final = pd.concat([df_feito_total, df_importados, df_percent, df_pedidos, df_confe], ignore_index=True)
+resultado_final = pd.concat([df_feito_total, df_importados, df_percent, df_pedidos], ignore_index=True)
 
 
 # Converter as colunas do DataFrame final para o formato numérico (excluindo a coluna 'Situação')
@@ -220,11 +220,13 @@ def create_dashboard_row(df, col_labels):
             )
 
 # Listando DataFrames e colunas que serão exibidas
-dataframes = [df_importados,    df_feito_total, df_percent, df_pedidos, df_confe]
+dataframes = [df_importados,    df_feito_total, df_percent, df_pedidos,]
+
 columns = [ "Varejo", "Confinado", "Volumoso","Conferência"]
 
 
 for df in dataframes:
+    df.loc[df['Situação'] == 'Enviados para Separação', 'Situação'] = 'Enviados para Separação / Aguardando Conferência'
     st.markdown(f"### **{df['Situação'].iloc[0]}**")
     create_dashboard_row(df, columns)
     
@@ -330,7 +332,7 @@ st.header("Acompanhamento das OC's")
 
 st.markdown("#### Total de OC's Concluídas por Setor")
 
-st.write("## Total de OC's ", total_ocs - 2)
+st.write("## Total de OC's ", total_ocs - 3)
 
 completed_by_sector = new_df.drop(columns=['O.C']).apply(lambda col: (col == 'Concluído').sum())
 
@@ -358,7 +360,7 @@ for idx, (sector, total_completed) in enumerate(completed_by_sector.items()):
                 text-align: center;
                 padding: 16px;">
                 <div>{sector}</div>
-                <div>{total_completed - 2}</div>
+                <div>{total_completed - 3}</div>
             </div>
             """,
             unsafe_allow_html=True
