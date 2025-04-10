@@ -22,7 +22,7 @@ st.header('Expedição')
 
 pedidos = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
-st.write(pedidos['Situação'].unique())
+
 
 
 
@@ -64,7 +64,7 @@ status_confe['O.C'] = status_confe['O.C'].astype(int)
 status_confe['O.C'] = status_confe['O.C'].astype(str)
 
 status_conferencia = status_confe.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
-st.write(status_conferencia)
+
 area_varejo = ['SEP VAREJO 01 - (PICKING)']
 situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
 
@@ -332,7 +332,7 @@ st.header("Acompanhamento das OC's")
 
 st.markdown("#### Total de OC's Concluídas por Setor")
 
-st.write("## Total de OC's ", total_ocs - 3)
+st.write("## Total de OC's ", total_ocs )
 
 completed_by_sector = new_df.drop(columns=['O.C']).apply(lambda col: (col == 'Concluído').sum())
 
@@ -360,7 +360,7 @@ for idx, (sector, total_completed) in enumerate(completed_by_sector.items()):
                 text-align: center;
                 padding: 16px;">
                 <div>{sector}</div>
-                <div>{total_completed - 3}</div>
+                <div>{total_completed }</div>
             </div>
             """,
             unsafe_allow_html=True
