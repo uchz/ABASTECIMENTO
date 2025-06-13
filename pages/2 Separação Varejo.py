@@ -124,19 +124,7 @@ tarefas_pivot_var = tarefas_por_hora_var.pivot_table(index='Usuário', columns='
 # Ordenar o DataFrame pelas horas
 tarefas_pivot_var = tarefas_pivot_var.reindex(columns=sorted(tarefas_pivot_var.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time()))
 
-# Calculando a média de cada coluna de horas
-#mean_values = tarefas_pivot.mean()
-
-#mean_values = mean_values.round(0).astype(int)
-
-# Adicionando as médias como uma nova linha ao DataFrame tarefas_pivot
-#tarefas_pivot.loc['Média Hora'] = mean_values
-
-#mean_total  = mean_values.mean().mean()
-
 sum_values = tarefas_pivot_var.sum()
-
-#sum_values = tarefas_pivot.drop('Média Hora').sum()
 
 
 tarefas_pivot_var.loc['Total P/ Hora'] = sum_values
@@ -150,9 +138,7 @@ def apply_color(val):
 
 
 tarefas_pivot_var['Total'] = tarefas_pivot_var.sum(axis=1)
-#tarefas_pivot['Total'] = tarefas_pivot['Total'].drop('Média Hora')
 
-#tarefas_pivot['Total'].fillna(mean_total, inplace=True)
 
 tarefas_pivot_var['Total'] = tarefas_pivot_var['Total'].astype(int)
 
@@ -166,80 +152,12 @@ st.write(tarefas_pivot_styled_var)
 
 st.subheader('Tarefas por Hora')
 
-#st.write(tarefas_pivot)
+
 
 tarefas_pivot_var = tarefas_pivot_var.drop(columns='Total')
 total_hora_data = tarefas_pivot_var.loc['Total P/ Hora']
 
 
-
-# df_total = total_hora_data.reset_index()
-# df_total.columns = ['Hora', 'Total']
-
-# # Converter Hora para valores numéricos para fazer a projeção
-# df_total['Hora_float'] = pd.to_datetime(df_total['Hora'], format='%H:%M').dt.hour + pd.to_datetime(df_total['Hora'], format='%H:%M').dt.minute / 60
-
-# # Criar modelo de regressão linear
-# X = df_total['Hora_float'].values.reshape(-1, 1)
-# y = df_total['Total'].values
-# #Treinamento do modelo
-# model = LinearRegression()
-# model.fit(X, y)
-
-# # Previsão para a próxima hora
-# ultima_hora = df_total['Hora_float'].iloc[-1]
-# proxima_hora_float = ultima_hora + 1  # Adiciona 1 hora
-# proxima_tarefa_prevista = model.predict([[proxima_hora_float]])
-
-# # Adicionar a projeção ao DataFrame
-# df_projecao = pd.DataFrame({
-#     'Hora': [f'{int(proxima_hora_float)}:00'],
-#     'Total': [proxima_tarefa_prevista[0]],
-#     'Projecao': ['Sim']  # Indicando que esse valor é projetado
-# })
-
-# # Combinar o DataFrame original com a projeção
-# df_total['Projecao'] = 'Não'  # Indicando dados reais
-# df_full = pd.concat([df_total, df_projecao], ignore_index=True)
-
-# # Criar o gráfico usando Matplotlib
-# plt.figure(figsize=(10, 6))
-
-# # Gráfico das tarefas reais
-# plt.plot(df_total['Hora'], df_total['Total'], label='Tarefas Reais', color='black', marker='o')
-
-# # Adicionar a projeção
-# # plt.plot(df_projecao['Hora'], df_projecao['Total'], label='Projeção', color='red', linestyle='--', marker='o')
-# meta_valores = []
-# for hora in total_hora_data.index:
-#     if hora in ['19:00', '00:00', '01:00']:
-#         meta_valores.append(621)  # Exemplo de meta nesses horários
-#     else:
-#         meta_valores.append(1242)  # Exemplo de meta para os outros horários
-
-# # Traçar a linha de meta
-# plt.plot(total_hora_data.index, meta_valores, linestyle='--', color='blue', label='Meta')
-
-# # Adicionar rótulos para os dados reais
-# for i, txt in enumerate(df_total['Total']):
-#     plt.text(df_total['Hora'].iloc[i], df_total['Total'].iloc[i] + 0.2, f'{txt:.2f}', color='black')
-
-# # plt.plot([df_total['Hora'].iloc[-1], f'{int(proxima_hora_float)}:00'], 
-# #         [df_total['Total'].iloc[-1], proxima_tarefa_prevista[0]], 
-# #         label='Projeção', linestyle='--', marker='x', color='red')
-
-# # Adicionar rótulos para a projeção
-# #plt.text(df_projecao['Hora'].iloc[0], df_projecao['Total'].iloc[0] + 0.2, f'{df_projecao["Total"].iloc[0]:.2f}', color='red')
-
-# # Configurar os rótulos e título do gráfico
-# plt.xlabel('Hora')
-# plt.ylabel('Total de Tarefas')
-# plt.title('Projeção de Tarefas por Hora')
-# plt.legend(['Total de Tarefas', 'Total Projetado', 'Meta'])
-# plt.grid(True)
-
-# # Exibir o gráfico
-# st.pyplot(plt)
 
 df_total = total_hora_data.reset_index()
 df_total.columns = ['Hora', 'Total']
@@ -250,9 +168,9 @@ meta_hora_filtrado = df_total[df_total['Hora'].isin(['19:00','20:00','21:00','22
 meta_valores = []
 for hora in meta_hora_filtrado['Hora']:
     if hora in ['19:00', '00:00', '01:00']:
-        meta_valores.append(836)  # Meta para horários específicos
+        meta_valores.append(575)  # Meta para horários específicos
     else:
-        meta_valores.append(1672)  # Meta para os outros horários
+        meta_valores.append(1150)  # Meta para os outros horários
 
 # Adicionar a coluna de meta no DataFrame
 meta_hora_filtrado['Meta'] = meta_valores
@@ -273,11 +191,11 @@ proxima_hora_float = ultima_hora + 1  # Adiciona 1 hora
 proxima_tarefa_prevista = model.predict([[proxima_hora_float]])
 
 # Adicionar a projeção ao DataFrame
-# df_projecao = pd.DataFrame({
-#     'Hora': [f'{int(proxima_hora_float)}:00'],
-#     'Total': [proxima_tarefa_prevista[0]],
-#     'Projecao': ['Sim']  # Indicando que esse valor é projetado
-# })
+df_projecao = pd.DataFrame({
+    'Hora': [f'{int(proxima_hora_float)}:00'],
+    'Total': [proxima_tarefa_prevista[0]],
+    'Projecao': ['Sim']  # Indicando que esse valor é projetado
+ })
 
 # Combinar o DataFrame original com a projeção
 df_total['Projecao'] = 'Não'  # Indicando dados reais
@@ -287,7 +205,7 @@ df_full = pd.concat([df_total], ignore_index=True)
 grafico_total = alt.Chart(df_full).mark_line(point=True).encode(
     x=alt.X('Hora:N', sort=None, title='Hora'),
     y=alt.Y('Total:Q', title='Total de Tarefas'),
-    color=alt.Color('Projecao:N', legend=None, scale=alt.Scale(domain=['Não', 'Sim'], range=['black', 'red'])),  # Diferença visual entre real e projetado
+    color=alt.Color('Projecao:N', legend=None, scale=alt.Scale(domain=['Não', 'Sim'], range=['orange', 'red'])),  # Diferença visual entre real e projetado
     tooltip=['Hora', 'Total']
 ).properties(
     title='Total de Apanhas por Hora',
@@ -304,14 +222,14 @@ color='red'
     tooltip=['Hora', 'Total']
 )
 # Rótulos dos dados no gráfico de total de tarefas
-rotulos_total = alt.Chart(df_full).mark_text(align='left', dx=5, dy=-5, color='black').encode(
+rotulos_total = alt.Chart(df_full).mark_text(align='left', dx=5, dy=-5, color='white').encode(
     x=alt.X('Hora:N', sort=None),
     y=alt.Y('Total:Q'),
     text=alt.Text('Total:Q')
 )
 
 # Gráfico da meta
-grafico_meta = alt.Chart(meta_hora_filtrado).mark_line(strokeDash=[5, 5], color='blue').encode(
+grafico_meta = alt.Chart(meta_hora_filtrado).mark_line(strokeDash=[5, 5], color='red').encode(
     x=alt.X('Hora:N', sort=None, title='Hora'),
     y=alt.Y('Meta:Q'),
     tooltip=['Hora', 'Meta']

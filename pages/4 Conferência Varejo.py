@@ -145,9 +145,10 @@ meta_hora_filtrado = df_total[df_total['Hora'].isin(['20:00','21:00','22:00','23
 meta_valores = []
 for hora in meta_hora_filtrado['Hora']:
     if hora in ['20:00', '00:00', '01:00']:
-        meta_valores.append(997)  # Meta para horários específicos
+        meta_valores.append(578)
+                              # Meta para horários específicos
     else:
-        meta_valores.append(1995)  # Meta para os outros horários
+        meta_valores.append(1155)  # Meta para os outros horários
 
 # Adicionar a coluna de meta no DataFrame
 meta_hora_filtrado['Meta'] = meta_valores
@@ -178,6 +179,7 @@ proxima_tarefa_prevista = model.predict([[proxima_hora_float]])
 df_total['Projecao'] = 'Não'  # Indicando dados reais
 df_full = pd.concat([df_total], ignore_index=True)
 
+st.write('## Conferência Varejo p/ Hora')
 # Gráfico principal: Total de tarefas por hora
 grafico_total = alt.Chart(df_full).mark_line(point=True).encode(
     x=alt.X('Hora:N', sort=None, title='Hora'),
