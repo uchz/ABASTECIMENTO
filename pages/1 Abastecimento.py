@@ -33,7 +33,7 @@ df_abastecimento.sort_values(by='DESCDESTINO', inplace=True)
 
 
 def validar_e_substituir(valor):
-    if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
+    if valor in ['ESTEIRA MFC', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
         return valor
     else:
         return 'SEP VOLUMOSO'
@@ -86,7 +86,7 @@ df_desempenho['Hora'] = df_desempenho['Dt./Hora Inicial'].dt.hour
 df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.time
 
 tipo = ['PREVENTIVO', 'CORRETIVO', 'TRANSFERÊNCIA']
-empilhadores = ['JOSIMAR.DUTRA', 'CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS','IGOR.VIANA', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA']
+empilhadores = ['JOSIMAR.DUTRA', 'CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS','IGOR.VIANA', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA', 'IGOR.CORREIA', 'YURI.XAVIER','LUIS.ALMEIDA']
 
 df_desempenho = df_desempenho[df_desempenho['Tipo '].isin(tipo)]
 df_desempenho = df_desempenho[df_desempenho['Usuário'].isin(empilhadores)]
@@ -97,11 +97,66 @@ contagem_tipos = corretivo_preventivo.groupby('Usuário')['Tipo '].count().sort_
 
 contagem_tipos = df_desempenho.groupby(['Usuário', 'Tipo ']).size().unstack(fill_value=0)
 contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
+contagem_tipos = contagem_tipos.sort_values(by='Total', ascending=False)
 contagem_tipos.loc['Total'] = contagem_tipos.sum()
-
 # st.header('Abastecimentos por Empilhador')
 st.dataframe(contagem_tipos)
 
+
+df_desempenho['Dt./Hora Inicial'] = pd.to_datetime(df_desempenho['Dt./Hora Inicial'], format='%d/%m/%Y %H:%M:%S')
+df_desempenho['Hora'] = df_desempenho['Dt./Hora Inicial'].dt.hour
+df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.time
+
+tipo = ['PREVENTIVO', 'CORRETIVO', 'TRANSFERÊNCIA']
+empilhadores = ['JOSIMAR.DUTRA', 'CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS','IGOR.VIANA', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA', 'IGOR.CORREIA', 'YURI.XAVIER','LUIS.ALMEIDA']
+
+df_desempenho = df_desempenho[df_desempenho['Tipo '].isin(tipo)]
+df_desempenho = df_desempenho[df_desempenho['Usuário'].isin(empilhadores)]
+corretivo_preventivo = df_desempenho[df_desempenho['Tipo '].isin(['CORRETIVO', 'PREVENTIVO'])]
+
+contagem_tipos = corretivo_preventivo.groupby('Usuário')['Tipo '].count().sort_values(ascending=False)
+
+contagem_tipos = df_desempenho.groupby(['Usuário', 'Tipo ']).size().unstack(fill_value=0)
+
+contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
+contagem_tipos.loc['Total'] = contagem_tipos.sum()
+
+
+st.write(' ## Total de Abastecimentos')
+col3, col4 = st.columns(2)
+
+
+
+with col3:
+    st.write('')
+    st.write('')
+    st.write('')
+    st.write('')
+    st.write('')
+    st.write('')
+
+    total_tipos = df_desempenho.groupby(['Tipo '])['Tipo '].count().reset_index(name='Total')
+    total_tipos = total_tipos.rename(columns={'Tipo ': 'Tipo'})
+    st.dataframe(total_tipos, height=151, width=450)
+
+with col4:
+
+    
+    import plotly.express as px
+
+    fig = px.pie(
+        total_tipos,
+        names='Tipo',
+        values='Total',
+        title='',
+        width=350,
+        height=350
+    )
+
+    st.plotly_chart(fig)
+
+
+# st.header('Abastecimentos por Empilhador')
 # with col1:
 #     st.write(abastecimento_area)
 
@@ -144,7 +199,6 @@ tarefas_pivot['Total'] = tarefas_pivot['Total'].astype(int)
 
 tarefas_pivot = tarefas_pivot.drop(columns='Total')
 total_hora_data = tarefas_pivot.loc['Total P/ Hora']
-
 
 
 # st.subheader('Evolução p/ Hora')
@@ -216,4 +270,3 @@ st.altair_chart(final_chart, use_container_width=True)
 
 
 st.pyplot(plt)
-
