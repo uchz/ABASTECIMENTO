@@ -18,7 +18,7 @@ col1, col2 = st.columns(2)
 
 
 
-#Upload do arquivo de abastecimento
+# #Upload do arquivo de abastecimento
 
 def abastecimento():
 
@@ -122,39 +122,88 @@ contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
 contagem_tipos.loc['Total'] = contagem_tipos.sum()
 
 
-st.write(' ## Total de Abastecimentos')
-col3, col4 = st.columns(2)
-
+st.write(' # Resumo do Abastecimento')
+col3, col4 = st.columns([1,2])
 
 
 with col3:
-    st.write('')
-    st.write('')
-    st.write('')
-    st.write('')
-    st.write('')
-    st.write('')
 
-    total_tipos = df_desempenho.groupby(['Tipo '])['Tipo '].count().reset_index(name='Total')
-    total_tipos = total_tipos.rename(columns={'Tipo ': 'Tipo'})
-    st.dataframe(total_tipos, height=151, width=450)
-
-with col4:
-
-    
-    import plotly.express as px
-
-    fig = px.pie(
-        total_tipos,
-        names='Tipo',
-        values='Total',
-        title='',
-        width=350,
-        height=350
+    st.markdown(
+    "<div style='text-align: center; font-size: 18px;'><b>Tarefas Pendentes P/ Código</b></div>",
+    unsafe_allow_html=True
     )
 
-    st.plotly_chart(fig)
 
+    st.markdown(
+    f"<div style='text-align: center; font-size: 25px;'><b>{total}</b></div>",
+    unsafe_allow_html=True
+    )
+
+
+    st.divider()
+
+    st.markdown(
+    "<div style='text-align: center; font-size: 20px;'><b>Pendente p/ Área</b></div>",
+    unsafe_allow_html=True
+    )
+
+    # Supondo que você já tem o df_desempenho:
+    total_tipos = df_desempenho.groupby(['Tipo '])['Tipo '].count().reset_index(name='Total')
+    total_tipos = total_tipos.rename(columns={'Tipo ': 'Tipo'})
+
+    # Cria a linha com o total geral
+    linha_total = pd.DataFrame([{'Tipo': 'Total Geral', 'Total': total_tipos['Total'].sum()}])
+
+    # Concatena ao DataFrame
+    total_tipos = pd.concat([total_tipos, linha_total], ignore_index=True)
+
+    # Exibe no Streamlit
+    st.dataframe(abastecimento_area.style.hide(axis='index').set_properties(**{'text-align': 'center'}), width=450)
+
+    
+    
+with col4:
+
+    st.markdown(
+    "<div style='text-align: center; font-size: 18px;'><b>Tarefas Realizadas</b></div>",
+    unsafe_allow_html=True
+    )
+
+
+    st.markdown(
+    f"<div style='text-align: center; font-size: 25px;'><b>{total_tipos['Total'][3]}</b></div>",
+    unsafe_allow_html=True
+    )
+
+    st.divider()
+    import plotly.express as px
+    
+    dados_grafico = total_tipos[total_tipos['Tipo'] != 'Total Geral']
+    dados_grafico = dados_grafico.sort_values(by='Total', ascending=False)
+    # Cria o gráfico sem o total
+    fig = px.bar(
+        dados_grafico,
+        x='Tipo',
+        y='Total',
+        title='',
+        width=400,
+        height=200  ,
+        color='Tipo',
+    )
+
+    fig.update_traces(textposition='outside')
+
+    # Opcional: melhora o layout
+    fig.update_layout(
+        yaxis_title='Quantidade',
+        xaxis_title='Tipo',
+        uniformtext_minsize=8,
+        uniformtext_mode='hide',
+
+    )
+
+    # Exibe no Streamlit
+    st.plotly_chart(fig)
 
 # st.header('Abastecimentos por Empilhador')
 # with col1:
@@ -167,7 +216,7 @@ cores = sns.color_palette('afmhot', len(contagem_tipos.columns[:-1]))
 tipos = contagem_tipos.columns[:-1]
 
 
-    # Agrupando por 'Usuário' e 'Tipo', e criando a tabela de contagem
+# Agrupando por 'Usuário' e 'Tipo', e criando a tabela de contagem
 contagem_tipos = df_desempenho.groupby(['Usuário', 'Tipo ']).size().unstack(fill_value=0)
 
 

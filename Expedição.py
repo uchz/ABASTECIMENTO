@@ -237,7 +237,7 @@ df['Descrição (Area de Separacao)'] = df['Descrição (Area de Separacao)'].ap
 # Extraindo todas as áreas únicas da coluna "Descrição (Area de Separacao)"
 areas = df['Descrição (Area de Separacao)'].unique()
 
-df[['Descrição (Área de Conferência)', 'Descrição (Area de Separacao)']]
+
 # Criando um novo DataFrame dinâmico para conter a "O.C", todas as áreas e as colunas de conferência
 new_df = pd.DataFrame(columns=['O.C'] + list(areas) + ['Conferência Varejo', 'Conferência Confinado', 'Validação Varejo', 'Conferência PNC'])
 # Preenchendo o novo DataFrame
@@ -256,7 +256,7 @@ for oc in df['O.C'].unique():
         # Define status da área de separação para "Andamento" ou "Concluído"
         if situacoes_separacao.isin(['Enviado para a separação', 'Processo de Separação']).any():
             row[area] = 'Andamento'
-        elif situacoes_separacao.isin(['Cancelada-Possui Retorno Merc.','Concluído','Pedido parcialmente cortado', 'Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes','Conferência validada', 'Conferência com divergência','Aguardando recontagem','Pedido totalmente cortado']).all():
+        elif situacoes_separacao.isin(['Cancelada','Cancelada-Possui Retorno Merc.','Concluído','Pedido parcialmente cortado', 'Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes','Conferência validada', 'Conferência com divergência','Aguardando recontagem','Pedido totalmente cortado']).all():
             row[area] = 'Concluído'
         else:
             row[area] = 'Andamento'  # Caso haja outra situação que não seja "Concluído"
@@ -271,11 +271,11 @@ for oc in df['O.C'].unique():
     
     
     # Verificando a situação para "Validação Varejo"
-    situacoes_validacao_varejo = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == 'CONFERENCIA MFC')]['Situação']
-    if situacoes_validacao_varejo.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência','Aguardando conferência volumes','Conferência com divergência']).any():
-        row['Validação Varejo'] = 'Andamento'
-    else:
-        row['Validação Varejo'] = 'Concluído'
+    # situacoes_validacao_varejo = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == 'CONFERENCIA MFC')]['Situação']
+    # if situacoes_validacao_varejo.isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência','Aguardando conferência volumes','Conferência com divergência']).any():
+    #     row['Validação Varejo'] = 'Andamento'
+    # else:
+    #     row['Validação Varejo'] = 'Concluído'
 
     # Verificando a situação para "Validação Varejo"
     situacoes_validacao_varejo = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == 'CONFERENCIA PNC')]['Situação']
@@ -296,7 +296,7 @@ for oc in df['O.C'].unique():
 
 # Criando o novo DataFrame a partir da lista de linhas
 new_df = pd.DataFrame(rows)
-new_df
+
 # Ordenando o DataFrame por O.C
 new_df.sort_values(by='O.C', inplace=True)
 new_df.reset_index(drop=True, inplace=True)
@@ -314,7 +314,7 @@ new_df = new_df.rename(columns={'ESTEIRA MFC' : 'Esteira MFC'})
 # new_df = new_df.rename(columns={'SEP CONFINADO' : 'Sep Confinado'})
 
 # Aplicando a estilização ao novo DataFrame
-new_df = new_df[['O.C', 'Esteira MFC','Conferência Varejo', 'Validação Varejo', 'Sep Volumoso','SEP PNC 26 E 27 - XR', 'Conferência PNC', 'Conferência Volumoso']]
+new_df = new_df[['O.C', 'Esteira MFC','Conferência Varejo', 'Sep Volumoso','SEP PNC 26 E 27 - XR', 'Conferência PNC', 'Conferência Volumoso']]
 styled_new_df = new_df.style.applymap(colorize_cells)
 total_ocs = new_df['Esteira MFC'].count()
 
