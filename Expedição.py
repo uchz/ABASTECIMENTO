@@ -223,14 +223,16 @@ def validar_e_substituir(valor):
     else:
         return 'SEP VOLUMOSO'
 
+with st.expander("📂 Upload de Arquivo"):
+    arquivo = st.file_uploader("Selecione um arquivo Excel", type=["xlsx", "xls"])
 # Uploader
-arquivo = st.file_uploader("Selecione um arquivo Excel", type=["xlsx", "xls"])
+# arquivo = st.file_uploader("Selecione um arquivo Excel", type=["xlsx", "xls"])
 
-# Verifica se o arquivo foi enviado
+    # Verifica se o arquivo foi enviado
 if arquivo is not None:
     df = pd.read_excel(arquivo, header=2)  # ou pd.read_csv(arquivo) para CSV
     st.success("Arquivo carregado com sucesso!")
-    
+
 
 
     # Carregando a planilha com a primeira linha relevante como cabeçalho

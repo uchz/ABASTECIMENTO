@@ -9,3 +9,4 @@ altair
 scikit-learn
 datetime
 streamlit_extras
+nbformat

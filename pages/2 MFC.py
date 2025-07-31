@@ -23,6 +23,12 @@ if arquivo is not None:
 # df_mfc['Hora Inducao'] = pd.to_datetime(df_mfc['Hora Inducao'])
 # df_mfc.info()
 
+
+
+
+col1, col2, col3 = st.columns([2,2,2])
+
+with col1:
     import plotly.express as px
 
     # Gráfico de barras com rótulos
@@ -39,12 +45,17 @@ if arquivo is not None:
     fig.update_layout(
         xaxis_title="Hora de Indução",
         yaxis_title="Quantidade",
-        width=900,
-        height=500,
+        width=400,
+        height=530,
         # template="plotly_dark",
         xaxis_tickangle=-45
         
     )
 
     st.plotly_chart(fig, use_container_width=True)
- 
+
+with col2:
+    st.write(df_mfc)
+
+with col3:
+    st.write(df_mfc)
