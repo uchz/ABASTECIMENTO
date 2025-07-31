@@ -21,215 +21,218 @@ def validar_e_substituir(valor):
 
 st.header('Expedição')
 
-# Uploader
-arquivo = st.file_uploader("Selecione um arquivo Excel", type=["xlsx", "xls"])
-
-# Verifica se o arquivo foi enviado
-if arquivo is not None:
-    pedidos = pd.read_excel(arquivo, header=2)  # ou pd.read_csv(arquivo) para CSV
-    st.success("Arquivo carregado com sucesso!")
-    # st.dataframe(df)
 
 # pedidos = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
 
 
-    colunas = ['Nro. Nota', 'Conferente', 'Enviado p/ Doca', 'Descrição (Área de Conferência)', 'Nro. Sep.', 'Nro. Único',
-                'Descrição (Doca do WMS)', 'Cód. Doca', 'Peso Bruto', 'M3 Bruto', 'Área', 'Cód. Emp OC', 'Cód. Área Sep', 'Triagem Realizada', 'Cod. Conferente' ]
+# colunas = ['Nro. Nota', 'Conferente', 'Enviado p/ Doca', 'Descrição (Área de Conferência)', 'Nro. Sep.', 'Nro. Único',
+#             'Descrição (Doca do WMS)', 'Cód. Doca', 'Peso Bruto', 'M3 Bruto', 'Área', 'Cód. Emp OC', 'Cód. Área Sep', 'Triagem Realizada', 'Cod. Conferente' ]
 
 
-    area_varejo = ['ESTEIRA MFC']
-    situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
+# area_varejo = ['ESTEIRA MFC']
+# situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
 
-    status_var = pedidos[pedidos['Descrição (Area de Separacao)'].isin(area_varejo)]
-    status_var = status_var[status_var['Situação'].isin(situacao)]
+# status_var = pedidos[pedidos['Descrição (Area de Separacao)'].isin(area_varejo)]
+# status_var = status_var[status_var['Situação'].isin(situacao)]
 
-    status_var['O.C'] = status_var['O.C'].astype(int)
-    status_var['O.C'] = status_var['O.C'].astype(str)
+# status_var['O.C'] = status_var['O.C'].astype(int)
+# status_var['O.C'] = status_var['O.C'].astype(str)
 
-    status_varejo = status_var.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
+# status_varejo = status_var.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
 
-    area_conferencia = ['CONFERENCIA MFC']
-    situacao = ['Aguardando conferência']
+# area_conferencia = ['CONFERENCIA MFC']
+# situacao = ['Aguardando conferência']
 
-    status_confe = pedidos[pedidos['Descrição (Área de Conferência)'].isin(area_conferencia)]
-    status_confe = status_confe[status_confe['Situação'].isin(situacao)]
+# status_confe = pedidos[pedidos['Descrição (Área de Conferência)'].isin(area_conferencia)]
+# status_confe = status_confe[status_confe['Situação'].isin(situacao)]
 
-    status_confe['O.C'] = status_confe['O.C'].astype(int)
-    status_confe['O.C'] = status_confe['O.C'].astype(str)
+# status_confe['O.C'] = status_confe['O.C'].astype(int)
+# status_confe['O.C'] = status_confe['O.C'].astype(str)
 
-    status_conferencia = status_confe.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
+# status_conferencia = status_confe.groupby('Situação').agg(Qtd_Pedidos = ('O.C', 'count'), OC = ('O.C', 'min'))
 
-    area_varejo = ['ESTEIRA MFC']
-    situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
+# area_varejo = ['ESTEIRA MFC']
+# situacao = ['Enviado para separação', 'Em processo separação','Aguardando conferência', 'Em processo conferência', 'Aguardando conferência volumes']
 
-    # st.markdown("# Expedição")
-
-
-    pedidos['Qtd. Tarefas'] = pd.to_numeric(pedidos['Qtd. Tarefas'], errors='coerce')
-
-    agrupado = pedidos.groupby(['Situação', 'Descrição (Area de Separacao)'])['Qtd. Tarefas'].sum().reset_index()
-
-    varejo = agrupado[agrupado['Descrição (Area de Separacao)'] == 'ESTEIRA MFC'].reset_index()
+# # st.markdown("# Expedição")
 
 
-    # expedicao = pd.read_excel('archives/Expedicao_de_Mercadorias.xls', header=2)
+# pedidos['Qtd. Tarefas'] = pd.to_numeric(pedidos['Qtd. Tarefas'], errors='coerce')
 
-    # expedicao.drop(columns=colunas, inplace=True)
+# agrupado = pedidos.groupby(['Situação', 'Descrição (Area de Separacao)'])['Qtd. Tarefas'].sum().reset_index()
 
-    # expedicao = expedicao[expedicao['Situação'] == 'Enviado para separação']
-    # expedicao['O.C'] = expedicao['O.C'].astype(int)
-    # expedicao['O.C'] = expedicao['O.C'].astype(str)
-
-    # status = expedicao.groupby('Descrição (Area de Separacao)').agg(Qtd_Ocs = ('O.C', 'count'), OC = ('O.C', 'min')).reset_index()
+# varejo = agrupado[agrupado['Descrição (Area de Separacao)'] == 'ESTEIRA MFC'].reset_index()
 
 
+# expedicao = pd.read_excel('archives/Expedicao_de_Mercadorias.xls', header=2)
 
-    # feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Pedido parcialmente cortado','Aguardando conferência volumes','Aguardando conferência', 'Concluído', 'Pedido totalmente cortado']
-    # varejo_feito = varejo[varejo['Situação'].isin(feito)].copy()
-    # varejo_feito['Situação'] = 'Apanhas Realizadas'
+# expedicao.drop(columns=colunas, inplace=True)
 
+# expedicao = expedicao[expedicao['Situação'] == 'Enviado para separação']
+# expedicao['O.C'] = expedicao['O.C'].astype(int)
+# expedicao['O.C'] = expedicao['O.C'].astype(str)
 
-    # agrupado = agrupado.loc[agrupado['Descrição (Area de Separacao)'] != 'SEP TUBOS']
-    # agrupado['Descrição (Area de Separacao)'] = agrupado['Descrição (Area de Separacao)'].apply(validar_e_substituir)
-    # volumoso = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VOLUMOSO'].reset_index()
-    # volumoso_feito = volumoso[volumoso['Situação'].isin(feito)].copy()
-    # volumoso_feito['Situação'] = 'Apanhas Realizadas'
-
-
-    # feito = ['Aguardando conferência volumes','Concluído', 'Conferência validada','Pedido totalmente cortado']
-    # conferencia = pedidos[pedidos['Descrição (Área de Conferência)'] == 'CONFERENCIA MFC'].reset_index()
-    # conf_varejo_feito = conferencia[conferencia['Situação'].isin(feito)].copy()
-    # conf_varejo_feito['Situação'] = 'Apanhas Realizadas'
+# status = expedicao.groupby('Descrição (Area de Separacao)').agg(Qtd_Ocs = ('O.C', 'count'), OC = ('O.C', 'min')).reset_index()
 
 
 
-    # df_feito_total = pd.DataFrame({
-    #     'Situação': ['Apanhas Feitas'],
-    #     'Varejo': [int(varejo_feito['Qtd. Tarefas'].sum())],
-    #     # 'Confinado': [int(confinado_feito['Qtd. Tarefas'].sum())],
-    #     'Volumoso': [int(volumoso_feito['Qtd. Tarefas'].sum())],
-    #     'Conferência': [int(conf_varejo_feito['Qtd. Tarefas'].sum())]
-    #     })
-
-    # df_importados = pd.DataFrame({
-    #     'Situação': ['Apanhas Importadas'],
-    #     'Varejo': [int(varejo['Qtd. Tarefas'].sum())],
-    #     # 'Confinado': [int(confinado['Qtd. Tarefas'].sum())],
-    #     'Volumoso': [int(volumoso['Qtd. Tarefas'].sum())] ,
-    #     'Conferência': [int(conferencia['Qtd. Tarefas'].sum())]
-
-    #     })
-    # df_feito_total[['Varejo', 'Volumoso','Conferência',]] = df_feito_total[['Varejo', 'Volumoso', 'Conferência']].apply(pd.to_numeric, errors='coerce')
-    # df_importados[['Varejo',  'Volumoso', 'Conferência', ]] = df_importados[['Varejo', 'Volumoso', 'Conferência']].apply(pd.to_numeric, errors='coerce')
-
-    # percent_varejo = (df_feito_total['Varejo'].values[0] / df_importados['Varejo'].values[0]) * 100
-    # # percent_confinado = (df_feito_total['Confinado'].values[0] / df_importados['Confinado'].values[0]) * 100
-    # percent_volumoso = (df_feito_total['Volumoso'].values[0] / df_importados['Volumoso'].values[0]) * 100
-    # percent_conferencia = (df_feito_total['Conferência'].values[0] / df_importados['Conferência'].values[0]) * 100
+# feito = ['Em processo conferência','Conferência validada','Conferência com divergência','Aguardando recontagem','Pedido parcialmente cortado','Aguardando conferência volumes','Aguardando conferência', 'Concluído', 'Pedido totalmente cortado']
+# varejo_feito = varejo[varejo['Situação'].isin(feito)].copy()
+# varejo_feito['Situação'] = 'Apanhas Realizadas'
 
 
 
-    #     # 3. Adicionar uma linha com as porcentagens
-    # df_percent = pd.DataFrame({
-    #         'Situação': ['Concluído'],
-    #         'Varejo': [f'{percent_varejo:.2f}%'],
-    #         # 'Confinado': [f'{percent_confinado:.2f}%'],
-    #         'Volumoso': [f'{percent_volumoso:.2f}%'],
-    #         'Conferência': [f'{percent_conferencia:.2f}%'],
-            
-    #         })
-
-    # def get_value(df, key):
-
-    #     return df.loc[key][0] if key in df.index else 0
+# agrupado = agrupado.loc[agrupado['Descrição (Area de Separacao)'] != 'SEP TUBOS']
+# agrupado['Descrição (Area de Separacao)'] = agrupado['Descrição (Area de Separacao)'].apply(validar_e_substituir)
+# volumoso = agrupado[agrupado['Descrição (Area de Separacao)'] == 'SEP VOLUMOSO'].reset_index()
+# volumoso_feito = volumoso[volumoso['Situação'].isin(feito)].copy()
+# volumoso_feito['Situação'] = 'Apanhas Realizadas'
 
 
-    # aguard_conf = conferencia[conferencia['Situação'] == 'Aguardando conferência']
-    # # Construindo o DataFrame com tratamento de valores ausentes e chaves não existentes
-    # df_pedidos = pd.DataFrame({
-    #     'Situação': ['Enviados para Separação'],
-    #     'Varejo': [get_value(status_varejo, 'Enviado para separação')],
-    #     # 'Confinado': [get_value(status_confinado, 'Enviado para separação')],
-    #     'Volumoso': [status['Qtd_Ocs'].sum() if not pd.isna(status['Qtd_Ocs'].sum()) else 0],
-    #     'Conferência': [get_value(status_conferencia, 'Aguardando conferência')],
+# feito = ['Aguardando conferência volumes','Concluído', 'Conferência validada','Pedido totalmente cortado']
+# conferencia = pedidos[pedidos['Descrição (Área de Conferência)'] == 'CONFERENCIA MFC'].reset_index()
+# conf_varejo_feito = conferencia[conferencia['Situação'].isin(feito)].copy()
+# conf_varejo_feito['Situação'] = 'Apanhas Realizadas'
+
+
+
+# df_feito_total = pd.DataFrame({
+#     'Situação': ['Apanhas Feitas'],
+#     'Varejo': [int(varejo_feito['Qtd. Tarefas'].sum())],
+#     # 'Confinado': [int(confinado_feito['Qtd. Tarefas'].sum())],
+#     'Volumoso': [int(volumoso_feito['Qtd. Tarefas'].sum())],
+#     'Conferência': [int(conf_varejo_feito['Qtd. Tarefas'].sum())]
+#     })
+
+# df_importados = pd.DataFrame({
+#     'Situação': ['Apanhas Importadas'],
+#     'Varejo': [int(varejo['Qtd. Tarefas'].sum())],
+#     # 'Confinado': [int(confinado['Qtd. Tarefas'].sum())],
+#     'Volumoso': [int(volumoso['Qtd. Tarefas'].sum())] ,
+#     'Conferência': [int(conferencia['Qtd. Tarefas'].sum())]
+
+#     })
+# df_feito_total[['Varejo', 'Volumoso','Conferência',]] = df_feito_total[['Varejo', 'Volumoso', 'Conferência']].apply(pd.to_numeric, errors='coerce')
+# df_importados[['Varejo',  'Volumoso', 'Conferência', ]] = df_importados[['Varejo', 'Volumoso', 'Conferência']].apply(pd.to_numeric, errors='coerce')
+
+# percent_varejo = (df_feito_total['Varejo'].values[0] / df_importados['Varejo'].values[0]) * 100
+# # percent_confinado = (df_feito_total['Confinado'].values[0] / df_importados['Confinado'].values[0]) * 100
+# percent_volumoso = (df_feito_total['Volumoso'].values[0] / df_importados['Volumoso'].values[0]) * 100
+# percent_conferencia = (df_feito_total['Conferência'].values[0] / df_importados['Conferência'].values[0]) * 100
+
+
+
+#     # 3. Adicionar uma linha com as porcentagens
+# df_percent = pd.DataFrame({
+#         'Situação': ['Concluído'],
+#         'Varejo': [f'{percent_varejo:.2f}%'],
+#         # 'Confinado': [f'{percent_confinado:.2f}%'],
+#         'Volumoso': [f'{percent_volumoso:.2f}%'],
+#         'Conferência': [f'{percent_conferencia:.2f}%'],
         
-    # })
+#         })
 
-    # df_confe = pd.DataFrame({
-    #     'Situação': ['Aguardando conferência'],
-    #     'Varejo': [get_value(status_varejo, 'Enviado para separação')],
-    #     # 'Confinado': [get_value(status_confinado, 'Enviado para separação')],
-    #     'Volumoso': [status['Qtd_Ocs'].sum() if not pd.isna(status['Qtd_Ocs'].sum()) else 0],
-    #     'Conferência': [get_value(status_conferencia, 'Aguardando conferência')],
+# def get_value(df, key):
 
-    # })
-
-    # resultado_final = pd.concat([df_feito_total, df_importados, df_percent, df_pedidos], ignore_index=True)
+#     return df.loc[key][0] if key in df.index else 0
 
 
-    # Converter as colunas do DataFrame final para o formato numérico (excluindo a coluna 'Situação')
+# aguard_conf = conferencia[conferencia['Situação'] == 'Aguardando conferência']
+# # Construindo o DataFrame com tratamento de valores ausentes e chaves não existentes
+# df_pedidos = pd.DataFrame({
+#     'Situação': ['Enviados para Separação'],
+#     'Varejo': [get_value(status_varejo, 'Enviado para separação')],
+#     # 'Confinado': [get_value(status_confinado, 'Enviado para separação')],
+#     'Volumoso': [status['Qtd_Ocs'].sum() if not pd.isna(status['Qtd_Ocs'].sum()) else 0],
+#     'Conferência': [get_value(status_conferencia, 'Aguardando conferência')],
+    
+# })
 
-    # Função para aplicar gráfico de barras apenas na l
+# df_confe = pd.DataFrame({
+#     'Situação': ['Aguardando conferência'],
+#     'Varejo': [get_value(status_varejo, 'Enviado para separação')],
+#     # 'Confinado': [get_value(status_confinado, 'Enviado para separação')],
+#     'Volumoso': [status['Qtd_Ocs'].sum() if not pd.isna(status['Qtd_Ocs'].sum()) else 0],
+#     'Conferência': [get_value(status_conferencia, 'Aguardando conferência')],
 
-    # Supondo que 'resultado_final' seja seu DataFrame
-    # resultado_final.set_index('Situação', inplace=True)
+# })
 
-    # st.dataframe(resultado_final)
-
-
-
-    # def create_dashboard_row(df, col_labels):
-    #     cols = st.columns(len(col_labels))  # Cria colunas no layout
-    #     for idx, col in enumerate(col_labels):
-    #         with cols[idx]:
-    #             st.markdown(
-    #                 f"""
-    #                 <div style="
-    #                     display: flex;
-    #                     flex-direction: column;
-    #                     justify-content: center;
-    #                     align-items: center;
-    #                     height: 100px;
-    #                     width: 100%;
-    #                     background-color: #f4f4f4;
-    #                     border-radius: 10px;
-    #                     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    #                     font-size: 20px;
-    #                     font-weight: bold;
-    #                     color: #333333;
-    #                     text-align: center;
-    #                     padding: 10px;">
-    #                     <div>{col}</div>
-    #                     <div>{df[col].iloc[0] if col in df.columns else "N/A"}</div>
-    #                 </div>
-    #                 """,
-    #                 unsafe_allow_html=True
-    #             )
-
-    # # Listando DataFrames e colunas que serão exibidas
-    # dataframes = [df_importados, df_feito_total, df_percent, df_pedidos,]
-
-    # columns = [ "Varejo", "Volumoso","Conferência"]
+# resultado_final = pd.concat([df_feito_total, df_importados, df_percent, df_pedidos], ignore_index=True)
 
 
-    # for df in dataframes:
-    #     df.loc[df['Situação'] == 'Enviados para Separação', 'Situação'] = 'Enviados para Separação / Aguardando Conferência'
-    #     st.markdown(f"### **{df['Situação'].iloc[0]}**")
-    #     create_dashboard_row(df, columns)
-        
+# # Converter as colunas do DataFrame final para o formato numérico (excluindo a coluna 'Situação')
 
-    st.divider()
-    st.divider()
+# # Função para aplicar gráfico de barras apenas na l
+
+# # Supondo que 'resultado_final' seja seu DataFrame
+# resultado_final.set_index('Situação', inplace=True)
+
+# # st.dataframe(resultado_final)
 
 
 
-    def validar_e_substituir(valor):
-        if valor in ['ESTEIRA MFC', 'SEP PNC 26 E 27 - XR', 'SEP VAREJO CONEXOES', 'SEP TUBOS - ÁREA EXTERNA XR' ]:
-            return valor
-        else:
-            return 'SEP VOLUMOSO'
-        
+# def create_dashboard_row(df, col_labels):
+#     cols = st.columns(len(col_labels))  # Cria colunas no layout
+#     for idx, col in enumerate(col_labels):
+#         with cols[idx]:
+#             st.markdown(
+#                 f"""
+#                 <div style="
+#                     display: flex;
+#                     flex-direction: column;
+#                     justify-content: center;
+#                     align-items: center;
+#                     height: 100px;
+#                     width: 100%;
+#                     background-color: #f4f4f4;
+#                     border-radius: 10px;
+#                     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+#                     font-size: 20px;
+#                     font-weight: bold;
+#                     color: #333333;
+#                     text-align: center;
+#                     padding: 10px;">
+#                     <div>{col}</div>
+#                     <div>{df[col].iloc[0] if col in df.columns else "N/A"}</div>
+#                 </div>
+#                 """,
+#                 unsafe_allow_html=True
+#             )
+
+# # Listando DataFrames e colunas que serão exibidas
+# dataframes = [df_importados, df_feito_total, df_percent, df_pedidos,]
+
+# columns = [ "Varejo", "Volumoso","Conferência"]
+
+
+# for df in dataframes:
+#     df.loc[df['Situação'] == 'Enviados para Separação', 'Situação'] = 'Enviados para Separação / Aguardando Conferência'
+#     st.markdown(f"### **{df['Situação'].iloc[0]}**")
+#     create_dashboard_row(df, columns)
+    
+
+# st.divider()
+# st.divider()
+
+
+
+def validar_e_substituir(valor):
+    if valor in ['ESTEIRA MFC', 'SEP PNC 26 E 27 - XR', 'SEP VAREJO CONEXOES', 'SEP TUBOS - ÁREA EXTERNA XR' ]:
+        return valor
+    else:
+        return 'SEP VOLUMOSO'
+
+# Uploader
+arquivo = st.file_uploader("Selecione um arquivo Excel", type=["xlsx", "xls"])
+
+# Verifica se o arquivo foi enviado
+if arquivo is not None:
+    df = pd.read_excel(arquivo)  # ou pd.read_csv(arquivo) para CSV
+    st.success("Arquivo carregado com sucesso!")
+    
+
+
     # Carregando a planilha com a primeira linha relevante como cabeçalho
     df = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
@@ -366,34 +369,4 @@ if arquivo is not None:
 
     df.head()
 
-    st.divider()
-
-    df_mfc = pd.read_csv('archives/data (4).csv', sep=';')
-    df_mfc['Hora Inducao'] = pd.to_datetime(df_mfc['Hora Inducao'])
-    df_mfc.info()
-
-    import plotly.express as px
-
-    # Gráfico de barras com rótulos
-    fig = px.bar(
-        df_mfc,
-        x="Hora Inducao",
-        y="Quantidade",
-        text="Quantidade",  # Rótulo
-        title="Quantidade por Hora de Indução",
-        color_discrete_sequence=["#d62727"]
-    )
-
-    fig.update_traces(textposition='outside')  # 'inside', 'outside', 'auto'
-    fig.update_layout(
-        xaxis_title="Hora de Indução",
-        yaxis_title="Quantidade",
-        width=900,
-        height=500,
-        # template="plotly_dark",
-        xaxis_tickangle=-45
-        
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
 
