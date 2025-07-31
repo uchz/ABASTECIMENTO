@@ -234,7 +234,7 @@ if arquivo is not None:
 
 
     # Carregando a planilha com a primeira linha relevante como cabeçalho
-    df = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
+    # df = pd.read_excel('archives/Expedicao_de_Mercadorias_Varejo.xls', header=2)
 
     # Substituindo valores na coluna "Descrição (Area de Separacao)"
     df['Descrição (Area de Separacao)'] = df['Descrição (Area de Separacao)'].apply(validar_e_substituir)
