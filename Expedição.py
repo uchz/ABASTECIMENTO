@@ -363,3 +363,35 @@ st.divider()
 st.write(styled_new_df)
 
 df.head()
+
+st.divider()
+
+df_mfc = pd.read_csv('archives/data (4).csv', sep=';')
+df_mfc['Hora Inducao'] = pd.to_datetime(df_mfc['Hora Inducao'])
+df_mfc.info()
+
+import plotly.express as px
+
+# Gráfico de barras com rótulos
+fig = px.bar(
+    df_mfc,
+    x="Hora Inducao",
+    y="Quantidade",
+    text="Quantidade",  # Rótulo
+    title="Quantidade por Hora de Indução",
+    color_discrete_sequence=["#d62727"]
+)
+
+fig.update_traces(textposition='outside')  # 'inside', 'outside', 'auto'
+fig.update_layout(
+    xaxis_title="Hora de Indução",
+    yaxis_title="Quantidade",
+    width=900,
+    height=500,
+    # template="plotly_dark",
+    xaxis_tickangle=-45
+    
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
