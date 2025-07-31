@@ -228,7 +228,7 @@ arquivo = st.file_uploader("Selecione um arquivo Excel", type=["xlsx", "xls"])
 
 # Verifica se o arquivo foi enviado
 if arquivo is not None:
-    df = pd.read_excel(arquivo)  # ou pd.read_csv(arquivo) para CSV
+    df = pd.read_excel(arquivo, header=2)  # ou pd.read_csv(arquivo) para CSV
     st.success("Arquivo carregado com sucesso!")
     
 
