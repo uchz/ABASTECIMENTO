@@ -13,7 +13,7 @@ from streamlit_extras.grid import grid
 
 
 def validar_e_substituir(valor):
-    if valor in ['ESTEIRA MFC', 'SEP PNC 26 E 27 - XR', 'SEP VAREJO CONEXOES']:
+    if valor in ['ESTEIRA MFC', 'SEP PNC 26 E 27 - XR', 'SEP VAREJO CONEXOES', 'SEP TUBOS - ÁREA EXTERNA XR' ]:
         return valor
     else:
         return 'SEP VOLUMOSO'
@@ -292,7 +292,7 @@ if arquivo is not None:
             row['Conferência PNC'] = 'Concluído'
 
         # Verificando a situação para "Validação Varejo"
-        situacoes_conf_vol = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == '<SEM AREA>')]['Situação']
+        situacoes_conf_vol = df[(df['O.C'] == oc) & (df['Descrição (Área de Conferência)'] == '<SEM AREA>') & (df['Descrição (Area de Separacao)'] == 'SEP VOLUMOSO')]['Situação']
         if situacoes_conf_vol .isin(['Enviado para separação', 'Em processo separação', 'Aguardando conferência', 'Em processo conferência','Aguardando conferência volumes','Conferência com divergência']).any():
             row['Conferência Volumoso'] = 'Andamento'
         else:

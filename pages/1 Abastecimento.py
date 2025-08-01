@@ -86,7 +86,7 @@ df_desempenho['Hora'] = df_desempenho['Dt./Hora Inicial'].dt.hour
 df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.time
 
 tipo = ['PREVENTIVO', 'CORRETIVO', 'TRANSFERÊNCIA']
-empilhadores = ['JOSIMAR.DUTRA', 'CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS','IGOR.VIANA', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA', 'IGOR.CORREIA', 'YURI.XAVIER','LUIS.ALMEIDA']
+empilhadores = ['JOSIMAR.DUTRA','ETIQUETA', 'CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS','IGOR.VIANA', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA', 'IGOR.CORREIA', 'YURI.XAVIER','LUIS.ALMEIDA']
 
 df_desempenho = df_desempenho[df_desempenho['Tipo '].isin(tipo)]
 df_desempenho = df_desempenho[df_desempenho['Usuário'].isin(empilhadores)]
@@ -108,7 +108,7 @@ df_desempenho['Hora'] = df_desempenho['Dt./Hora Inicial'].dt.hour
 df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.time
 
 tipo = ['PREVENTIVO', 'CORRETIVO', 'TRANSFERÊNCIA']
-empilhadores = ['JOSIMAR.DUTRA', 'CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS','IGOR.VIANA', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA', 'IGOR.CORREIA', 'YURI.XAVIER','LUIS.ALMEIDA']
+empilhadores = ['JOSIMAR.DUTRA', 'ETIQUETA','CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS','IGOR.VIANA', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA', 'IGOR.CORREIA', 'YURI.XAVIER','LUIS.ALMEIDA']
 
 df_desempenho = df_desempenho[df_desempenho['Tipo '].isin(tipo)]
 df_desempenho = df_desempenho[df_desempenho['Usuário'].isin(empilhadores)]
@@ -176,34 +176,40 @@ with col4:
     )
 
     st.divider()
-    import plotly.express as px
     
+    import plotly.express as px
+
     dados_grafico = total_tipos[total_tipos['Tipo'] != 'Total Geral']
     dados_grafico = dados_grafico.sort_values(by='Total', ascending=False)
-    # Cria o gráfico sem o total
+
+    # Cria o gráfico com rótulos
     fig = px.bar(
         dados_grafico,
         x='Tipo',
         y='Total',
-        title='',
-        width=400,
-        height=200  ,
         color='Tipo',
+        text_auto=True,  # Rótulos automáticos
+        width=500,
+        height=300
     )
 
-    fig.update_traces(textposition='outside')
+    # Ajustes visuais
+    fig.update_traces(
+        textfont_size=14,
+        textangle=0,
+        textposition="outside",
+        cliponaxis=False  # Permite texto sair do eixo Y
+    )
 
-    # Opcional: melhora o layout
     fig.update_layout(
         yaxis_title='Quantidade',
         xaxis_title='Tipo',
         uniformtext_minsize=8,
         uniformtext_mode='hide',
-
+        margin=dict(t=20, b=40),
     )
 
-    # Exibe no Streamlit
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
 
 # st.header('Abastecimentos por Empilhador')
 # with col1:
@@ -231,11 +237,11 @@ df_long = contagem_tipos.reset_index().melt(id_vars='Usuário', var_name='Tipo',
 tarefas_por_hora = df_desempenho.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
 tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
 tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
-tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time())
+tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=6)).time())
 tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Ordenacao'])
 tarefas_por_hora = tarefas_por_hora.drop('Ordenacao', axis=1)
 tarefas_pivot = tarefas_por_hora.pivot_table(index='Usuário', columns='Hora', values='Qtde Tarefas', fill_value=0)
-tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time()))
+tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=6)).time()))
 sum_values = tarefas_pivot.sum()
 tarefas_pivot.loc['Total P/ Hora'] = sum_values
 tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
