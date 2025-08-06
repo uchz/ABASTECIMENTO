@@ -122,7 +122,7 @@ contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
 contagem_tipos.loc['Total'] = contagem_tipos.sum()
 
 
-st.write(' # Resumo do Abastecimento')
+st.write(' # Status do Abastecimento')
 col3, col4 = st.columns([1,2])
 
 
