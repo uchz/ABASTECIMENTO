@@ -18,7 +18,7 @@ col1, col2 = st.columns(2)
 
 
 
-#Upload do arquivo de abastecimento
+# #Upload do arquivo de abastecimento
 
 def abastecimento():
 
@@ -33,7 +33,7 @@ df_abastecimento.sort_values(by='DESCDESTINO', inplace=True)
 
 
 def validar_e_substituir(valor):
-    if valor in ['SEP VAREJO 01 - (PICKING)', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
+    if valor in ['ESTEIRA MFC', 'SEP CONFINADO', 'SEP VAREJO CONEXOES']:
         return valor
     else:
         return 'SEP VOLUMOSO'
@@ -86,7 +86,7 @@ df_desempenho['Hora'] = df_desempenho['Dt./Hora Inicial'].dt.hour
 df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.time
 
 tipo = ['PREVENTIVO', 'CORRETIVO', 'TRANSFERÊNCIA']
-empilhadores = ['JOSIMAR.DUTRA', 'CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS','IGOR.VIANA', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA']
+empilhadores = ['JOSIMAR.DUTRA','ETIQUETA', 'CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS','IGOR.VIANA', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA', 'IGOR.CORREIA', 'YURI.XAVIER','LUIS.ALMEIDA']
 
 df_desempenho = df_desempenho[df_desempenho['Tipo '].isin(tipo)]
 df_desempenho = df_desempenho[df_desempenho['Usuário'].isin(empilhadores)]
@@ -97,11 +97,121 @@ contagem_tipos = corretivo_preventivo.groupby('Usuário')['Tipo '].count().sort_
 
 contagem_tipos = df_desempenho.groupby(['Usuário', 'Tipo ']).size().unstack(fill_value=0)
 contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
+contagem_tipos = contagem_tipos.sort_values(by='Total', ascending=False)
 contagem_tipos.loc['Total'] = contagem_tipos.sum()
-
 # st.header('Abastecimentos por Empilhador')
 st.dataframe(contagem_tipos)
 
+
+df_desempenho['Dt./Hora Inicial'] = pd.to_datetime(df_desempenho['Dt./Hora Inicial'], format='%d/%m/%Y %H:%M:%S')
+df_desempenho['Hora'] = df_desempenho['Dt./Hora Inicial'].dt.hour
+df_desempenho['Hora'] = pd.to_datetime(df_desempenho['Hora'], format='%H').dt.time
+
+tipo = ['PREVENTIVO', 'CORRETIVO', 'TRANSFERÊNCIA']
+empilhadores = ['JOSIMAR.DUTRA', 'ETIQUETA','CROI.MOURA', 'LUIZ.BRAZ', 'ERICK.REIS','IGOR.VIANA', 'CLAUDIO.MARINS', 'THIAGO.SOARES', 'LUCAS.FARIAS', 'FABRICIO.SILVA', 'IGOR.CORREIA', 'YURI.XAVIER','LUIS.ALMEIDA']
+
+df_desempenho = df_desempenho[df_desempenho['Tipo '].isin(tipo)]
+df_desempenho = df_desempenho[df_desempenho['Usuário'].isin(empilhadores)]
+corretivo_preventivo = df_desempenho[df_desempenho['Tipo '].isin(['CORRETIVO', 'PREVENTIVO'])]
+
+contagem_tipos = corretivo_preventivo.groupby('Usuário')['Tipo '].count().sort_values(ascending=False)
+
+contagem_tipos = df_desempenho.groupby(['Usuário', 'Tipo ']).size().unstack(fill_value=0)
+
+contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
+contagem_tipos.loc['Total'] = contagem_tipos.sum()
+
+
+st.write(' # Status do Abastecimento')
+col3, col4 = st.columns([1,2])
+
+
+with col3:
+
+    st.markdown(
+    "<div style='text-align: center; font-size: 18px;'><b>Tarefas Pendentes P/ Código</b></div>",
+    unsafe_allow_html=True
+    )
+
+
+    st.markdown(
+    f"<div style='text-align: center; font-size: 25px;'><b>{total}</b></div>",
+    unsafe_allow_html=True
+    )
+
+
+    st.divider()
+
+    st.markdown(
+    "<div style='text-align: center; font-size: 20px;'><b>Pendente p/ Área</b></div>",
+    unsafe_allow_html=True
+    )
+
+    # Supondo que você já tem o df_desempenho:
+    total_tipos = df_desempenho.groupby(['Tipo '])['Tipo '].count().reset_index(name='Total')
+    total_tipos = total_tipos.rename(columns={'Tipo ': 'Tipo'})
+
+    # Cria a linha com o total geral
+    linha_total = pd.DataFrame([{'Tipo': 'Total Geral', 'Total': total_tipos['Total'].sum()}])
+
+    # Concatena ao DataFrame
+    total_tipos = pd.concat([total_tipos, linha_total], ignore_index=True)
+
+    # Exibe no Streamlit
+    st.dataframe(abastecimento_area.style.hide(axis='index').set_properties(**{'text-align': 'center'}), width=450)
+
+    
+    
+with col4:
+
+    st.markdown(
+    "<div style='text-align: center; font-size: 18px;'><b>Tarefas Realizadas</b></div>",
+    unsafe_allow_html=True
+    )
+
+
+    st.markdown(
+    f"<div style='text-align: center; font-size: 25px;'><b>{total_tipos['Total'][3]}</b></div>",
+    unsafe_allow_html=True
+    )
+
+    st.divider()
+    
+    import plotly.express as px
+
+    dados_grafico = total_tipos[total_tipos['Tipo'] != 'Total Geral']
+    dados_grafico = dados_grafico.sort_values(by='Total', ascending=False)
+
+    # Cria o gráfico com rótulos
+    fig = px.bar(
+        dados_grafico,
+        x='Tipo',
+        y='Total',
+        color='Tipo',
+        text_auto=True,  # Rótulos automáticos
+        width=500,
+        height=300
+    )
+
+    # Ajustes visuais
+    fig.update_traces(
+        textfont_size=14,
+        textangle=0,
+        textposition="outside",
+        cliponaxis=False  # Permite texto sair do eixo Y
+    )
+
+    fig.update_layout(
+        yaxis_title='Quantidade',
+        xaxis_title='Tipo',
+        uniformtext_minsize=8,
+        uniformtext_mode='hide',
+        margin=dict(t=20, b=40),
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# st.header('Abastecimentos por Empilhador')
 # with col1:
 #     st.write(abastecimento_area)
 
@@ -112,7 +222,7 @@ cores = sns.color_palette('afmhot', len(contagem_tipos.columns[:-1]))
 tipos = contagem_tipos.columns[:-1]
 
 
-    # Agrupando por 'Usuário' e 'Tipo', e criando a tabela de contagem
+# Agrupando por 'Usuário' e 'Tipo', e criando a tabela de contagem
 contagem_tipos = df_desempenho.groupby(['Usuário', 'Tipo ']).size().unstack(fill_value=0)
 
 
@@ -127,11 +237,11 @@ df_long = contagem_tipos.reset_index().melt(id_vars='Usuário', var_name='Tipo',
 tarefas_por_hora = df_desempenho.groupby(['Usuário', 'Hora']).size().reset_index(name='Qtde Tarefas')
 tarefas_por_hora['Hora'] = tarefas_por_hora['Hora'].apply(lambda x: x.strftime('%H:%M'))
 tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Hora'])
-tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time())
+tarefas_por_hora['Ordenacao'] = tarefas_por_hora['Hora'].apply(lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=6)).time())
 tarefas_por_hora = tarefas_por_hora.sort_values(by=['Usuário', 'Ordenacao'])
 tarefas_por_hora = tarefas_por_hora.drop('Ordenacao', axis=1)
 tarefas_pivot = tarefas_por_hora.pivot_table(index='Usuário', columns='Hora', values='Qtde Tarefas', fill_value=0)
-tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=5)).time()))
+tarefas_pivot = tarefas_pivot.reindex(columns=sorted(tarefas_pivot.columns, key=lambda x: (pd.to_datetime(str(x), format='%H:%M') + pd.DateOffset(hours=6)).time()))
 sum_values = tarefas_pivot.sum()
 tarefas_pivot.loc['Total P/ Hora'] = sum_values
 tarefas_pivot['Total'] = tarefas_pivot.sum(axis=1)
@@ -144,7 +254,6 @@ tarefas_pivot['Total'] = tarefas_pivot['Total'].astype(int)
 
 tarefas_pivot = tarefas_pivot.drop(columns='Total')
 total_hora_data = tarefas_pivot.loc['Total P/ Hora']
-
 
 
 # st.subheader('Evolução p/ Hora')
@@ -216,4 +325,3 @@ st.altair_chart(final_chart, use_container_width=True)
 
 
 st.pyplot(plt)
-
