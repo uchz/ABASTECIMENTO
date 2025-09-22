@@ -26,7 +26,7 @@ def ajustar_data_operacional(df, coluna_datahora):
 
     return df_filtrado
 
-@st.cache_data
+
 def carregar_dados_drive():
     url = "https://docs.google.com/spreadsheets/d/1kvoaO1bggIh9gipD6pZtaMpJ9i1MSVu9/export?format=csv"
     df = pd.read_csv(url)
