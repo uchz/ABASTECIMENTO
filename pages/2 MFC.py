@@ -26,7 +26,14 @@ def ajustar_data_operacional(df, coluna_datahora):
 
     return df_filtrado
 
-df = pd.read_excel('archives/geral_pedidos.xlsx')
+@st.cache_data
+def carregar_dados_drive():
+    url = "https://docs.google.com/spreadsheets/d/1kvoaO1bggIh9gipD6pZtaMpJ9i1MSVu9/export?format=csv"
+    df = pd.read_csv(url)
+    return df
+
+df = carregar_dados_drive()
+# df = pd.read_excel('archives/geral_pedidos.xlsx')
 
 df = ajustar_data_operacional(df, 'Data Início')
 
