@@ -5,9 +5,30 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 
 
+def ajustar_data_operacional(df, coluna_datahora):
+    # Converte a coluna para datetime
+    df[coluna_datahora] = pd.to_datetime(df[coluna_datahora], dayfirst=True)
+
+    # Define os limites de horário
+    hora_inicio = pd.to_datetime("18:00:00").time()
+    hora_fim = pd.to_datetime("06:00:00").time()
+
+    # Filtra apenas os horários entre 18:00 e 23:59 ou entre 00:00 e 06:00
+    df_filtrado = df[
+        (df[coluna_datahora].dt.time >= hora_inicio) | 
+        (df[coluna_datahora].dt.time <= hora_fim)
+    ].copy()
+
+    # Cria nova coluna com data ajustada
+    df_filtrado['Data Operacional'] = df_filtrado[coluna_datahora].apply(
+        lambda x: x.date() if x.time() >= hora_inicio else (x - pd.Timedelta(days=1)).date()
+    )
+
+    return df_filtrado
+
 df = pd.read_excel('archives/geral_pedidos.xlsx')
 
-
+df = ajustar_data_operacional(df, 'Data Início')
 
 
 
@@ -17,7 +38,7 @@ st.title("Dashboard MFC")
 
 
 # --- Leitura dos dados ---
-df = pd.read_excel('archives/geral_pedidos.xlsx')
+
 df_apanhas = df.drop_duplicates(subset=['Cod. SKU', 'Num. Pedido'])
 
 # --- Cálculos principais ---
@@ -25,6 +46,7 @@ total_apanhas = df_apanhas['Situação'].value_counts().sum()
 apanhas_realizadas = df_apanhas['Situação'].value_counts().get('F', 0)
 apanhas_pendentes = total_apanhas - apanhas_realizadas
 total_caixas = df['Num. Picking'].nunique()
+
 
 def status_picking(situacoes):
     if all(s == "F" for s in situacoes):
@@ -88,40 +110,81 @@ total = total_bal + total_reconf
 perc_bal = (total_bal / total) * 100
 perc_reconf = (total_reconf / total) * 100
 
-# --- Gráfico de pizza com Plotly ---
+# -- Produtividade Order Start --
+
+df['HORA'] = df['Data Início'].dt.hour
+order_start = df.drop_duplicates(subset='Num. Picking')
+ordem = list(range(19, 24)) + list(range(00, 5))
+
+# Transformar a coluna HORA em categórica
+order_start["HORA"] = pd.Categorical(order_start["HORA"], categories=ordem, ordered=True)
+
+# Ordenar o dataframe pelas horas na ordem do turno
+order_start = order_start.sort_values("HORA").reset_index(drop=True)
+
+order_start = order_start.groupby("HORA").size().reset_index(name="QTD")
+
+# Converter para formato HH:00 com 2 dígitos
+order_start["HORA"] = order_start["HORA"].apply(lambda x: f"{int(x):02d}:00")
+
+# --- Gráfico de pizza ---
 df_pizza = pd.DataFrame({
     'Tipo': ['Balança', 'Reconferência'],
     'Quantidade': [total_bal, total_reconf]
 })
 
-fig = px.pie(df_pizza, names='Tipo', values='Quantidade',
-             color='Tipo', color_discrete_map={'Balança':'#1E88E5', 'Reconferência':'#F4511E'},
-             title='Distribuição por Conferência') 
+fig_pizza = px.pie(df_pizza, names='Tipo', values='Quantidade',
+                   color='Tipo', color_discrete_map={'Balança':'#1E88E5', 'Reconferência':'#F4511E'})
 
-fig.update_layout(
-    title=" ",  # remove o título interno do gráfico
-    paper_bgcolor='rgba(0,0,0,0)',  # transparente
-    plot_bgcolor='rgba(0,0,0,0)',   # transparente
+fig_pizza.update_layout(
+    title=" ",  # remove título interno
+    paper_bgcolor='rgba(0,0,0,0)',  # fundo transparente
+    plot_bgcolor='rgba(0,0,0,0)',
     margin=dict(t=10, b=10, l=10, r=10),
     legend=dict(
-        orientation="h",   # horizontal
-        y=-0.1,            # posição vertical (abaixo do gráfico)
-        x=0.5,             # centralizado horizontal
-        xanchor='center',  
+        orientation="h",
+        y=-0.2,           # joga legenda pra baixo
+        x=0.5,
+        xanchor='center',
         yanchor='top'
-    )  # margens internas pequenas
+    )
 )
 
-# --- Layout Streamlit ---
-st.subheader("Eficiência de Conferência")
+# --- Gráfico de barras ---
+fig_bar = px.bar(
+    order_start,
+    x="HORA",
+    y="QTD",
+    text="QTD",
+    labels={"HORA": "Hora do Turno", "QTD": "Quantidade"},
+    title="Produtividade p/ Hora"
+)
+fig_bar.update_traces(marker_color="#1E88E5",textposition="outside")
+fig_bar.update_layout(
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',
+    margin=dict(t=50, b=10, l=10, r=10),
+    uniformtext_minsize=10,
+    uniformtext_mode="hide"
+)
+
+# --- Layout no Streamlit ---
 col_left, col_right = st.columns([1, 2])
 
 with col_left:
-    st.plotly_chart(fig, use_container_width=True, height=150)  # altura reduzida
+    st.subheader("Eficiência da Balança")
+    st.plotly_chart(fig_pizza, use_container_width=True, height=250)
+    st.markdown(
+        f"""
+        <div style="text-align: center; font-size:16px;">
+            <b>Volumes Finalizados:</b> {total}  <br>
+            <b style="color:#1E88E5;">Balança:</b> {total_bal} ({perc_bal:.2f}%)  <br>
+            <b style="color:#F4511E;">Reconferência:</b> {total_reconf} ({perc_reconf:.2f}%)
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 with col_right:
-    st.markdown(f"""
-    **Volumes Finalizados:** {total}  
-    **Balança:** {total_bal} ({perc_bal:.2f}%)  
-    **Reconferência:** {total_reconf} ({perc_reconf:.2f}%)
-    """)
+    st.subheader("Produtividade Order Start")
+    st.plotly_chart(fig_bar, use_container_width=True, height=300)
