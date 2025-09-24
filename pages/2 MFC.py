@@ -10,7 +10,7 @@ def ajustar_data_operacional(df, coluna_datahora):
     df[coluna_datahora] = pd.to_datetime(df[coluna_datahora], dayfirst=True)
 
     # Define os limites de horário
-    hora_inicio = pd.to_datetime("18:00:00").time()
+    hora_inicio = pd.to_datetime("19:00:00").time()
     hora_fim = pd.to_datetime("06:00:00").time()
 
     # Filtra apenas os horários entre 18:00 e 23:59 ou entre 00:00 e 06:00
@@ -26,30 +26,44 @@ def ajustar_data_operacional(df, coluna_datahora):
 
     return df_filtrado
 
-@st.cache_data(ttl=60)
-def carregar_dados_drive():
-    url = "https://docs.google.com/spreadsheets/d/1kvoaO1bggIh9gipD6pZtaMpJ9i1MSVu9/export?format=csv"
-    df = pd.read_csv(url)
+  # atualiza a cada 60 segundos
+def carregar_dados_onedrive():
+    caminho = r"C:\\Users\\luis.silva\Documents\\OneDrive - LLE Ferragens\\MFC\\geral_pedidos.csv"
+    df = pd.read_csv(caminho, sep=";", on_bad_lines="skip", engine="python")
     return df
 
-df = carregar_dados_drive()
+def carregar_dados_drive():
+    caminho = r"C:\\Users\\luis.silva\Documents\\OneDrive - LLE Ferragens\\MFC\\order_start.csv"
+    df = pd.read_csv(caminho, sep=";", on_bad_lines="skip", engine="python")
+    return df
+
+df = carregar_dados_onedrive()
+
+order_start = carregar_dados_drive()
+
+
+df = carregar_dados_onedrive()
 # df = pd.read_excel('archives/geral_pedidos.xlsx')
 
 df = ajustar_data_operacional(df, 'Data Início')
 
+drop = df['Data Operacional'].unique()[0]
+
+df = df[df['Data Operacional'] != drop]
 
 
 # --- Configurações da página ---
-st.set_page_config(page_title="Dashboard MFC", layout="wide")
-st.title("Dashboard MFC")
+st.set_page_config(page_title="Acompanhamento MFC", layout="wide")
+st.title("Acompanhamento MFC")
 
 
 # --- Leitura dos dados ---
 
 df_apanhas = df.drop_duplicates(subset=['Cod. SKU', 'Num. Pedido'])
 
+
 # --- Cálculos principais ---
-total_apanhas = df_apanhas['Situação'].value_counts().sum()
+total_apanhas = df_apanhas['Situação'].count()
 apanhas_realizadas = df_apanhas['Situação'].value_counts().get('F', 0)
 apanhas_pendentes = total_apanhas - apanhas_realizadas
 total_caixas = df['Num. Picking'].nunique()
@@ -119,17 +133,19 @@ perc_reconf = (total_reconf / total) * 100
 
 # -- Produtividade Order Start --
 
-df['HORA'] = df['Data Início'].dt.hour
-order_start = df.drop_duplicates(subset='Num. Picking')
+
 ordem = list(range(19, 24)) + list(range(00, 5))
 
+print(order_start.info())
+order_start['Hora Inducao'] = pd.to_datetime(order_start['Hora Inducao'])
+order_start['HORA'] = order_start['Hora Inducao'].dt.hour
 # Transformar a coluna HORA em categórica
 order_start["HORA"] = pd.Categorical(order_start["HORA"], categories=ordem, ordered=True)
 
 # Ordenar o dataframe pelas horas na ordem do turno
 order_start = order_start.sort_values("HORA").reset_index(drop=True)
 
-order_start = order_start.groupby("HORA").size().reset_index(name="QTD")
+
 
 # Converter para formato HH:00 com 2 dígitos
 order_start["HORA"] = order_start["HORA"].apply(lambda x: f"{int(x):02d}:00")
@@ -161,9 +177,9 @@ fig_pizza.update_layout(
 fig_bar = px.bar(
     order_start,
     x="HORA",
-    y="QTD",
-    text="QTD",
-    labels={"HORA": "Hora do Turno", "QTD": "Quantidade"},
+    y="Quantidade",
+    text="Quantidade",
+    labels={"HORA": "Hora do Turno"},
     title="Produtividade p/ Hora"
 )
 fig_bar.update_traces(marker_color="#1E88E5",textposition="outside")
