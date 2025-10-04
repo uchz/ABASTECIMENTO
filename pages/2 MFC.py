@@ -33,9 +33,9 @@ def carregar_dados_onedrive():
     return df
 
 def carregar_dados_drive():
-    caminho = r"C:\\Users\\luis.silva\Documents\\OneDrive - LLE Ferragens\\MFC\\order_start.csv"
-    df = pd.read_csv(caminho, sep=";", on_bad_lines="skip", engine="python")
-    return df
+    caminhos = r"C:\\Users\\luis.silva\Documents\\OneDrive - LLE Ferragens\\MFC\\order_start.csv"
+    order_start = pd.read_csv(caminhos, sep=";", on_bad_lines="skip", engine="python")
+    return order_start
 
 df = carregar_dados_onedrive()
 
@@ -47,10 +47,10 @@ df = carregar_dados_onedrive()
 
 df = ajustar_data_operacional(df, 'Data Início')
 
-drop = df['Data Operacional'].unique()[0]
+drop = df['Data Operacional'].sort_values(ascending=True).unique()[0]
+
 
 df = df[df['Data Operacional'] != drop]
-
 
 # --- Configurações da página ---
 st.set_page_config(page_title="Acompanhamento MFC", layout="wide")
@@ -107,18 +107,17 @@ cols = st.columns(5)
 
 cols[0].markdown(card("Total de Apanhas", total_apanhas, "🛒", "#1E88E5"), unsafe_allow_html=True)
 cols[1].markdown(card("Apanhas Realizadas", apanhas_realizadas, "✅", "#43A047"), unsafe_allow_html=True)
-cols[2].markdown(card("Apanhas Pendentes", apanhas_pendentes, "⚠️", "#CEA903"), unsafe_allow_html=True)
-cols[3].markdown(card("Total de Caixas", total_caixas, "📦", "#8E24AA"), unsafe_allow_html=True)
-cols[4].markdown(card("Pendentes / Indução", f"{caixas_pendentes} / {pendentes_inducao}", "⏳", "#F4511E"), unsafe_allow_html=True)
+cols[2].markdown(card("Total de Volumes", total_caixas, "📦", "#8E24AA"), unsafe_allow_html=True)
+cols[3].markdown(card("Volumes Pendentes", caixas_pendentes, "⚠️", "#CEA903"), unsafe_allow_html=True)
+cols[4].markdown(card("Volumes p/ Indução", pendentes_inducao, "⏳", "#F4511E"), unsafe_allow_html=True)
 
 
 # --- Cálculos de eficiência ---
 check_weight = df[['Situação','Situação Conferência', 'Num. Picking','Data Início',
                    'Data Finalização','Data Conferência','Usuário Operador','Usuário Conferência']] 
 
-eficiencia = check_weight[(check_weight['Situação'] == 'F') & (check_weight['Situação Conferência'] == 'F')]
+eficiencia = df[(check_weight['Situação'] == 'F') & (df['Situação Conferência'] == 'F')]
 eficiencia = eficiencia.drop_duplicates(subset='Num. Picking')
-eficiencia = eficiencia.dropna(subset='Usuário Conferência')
 
 balanca = eficiencia[eficiencia['Usuário Conferência'] == 'CHECK_WEIGHT']
 reconf = eficiencia[eficiencia['Usuário Conferência'] != 'CHECK_WEIGHT']
@@ -149,6 +148,31 @@ order_start = order_start.sort_values("HORA").reset_index(drop=True)
 
 # Converter para formato HH:00 com 2 dígitos
 order_start["HORA"] = order_start["HORA"].apply(lambda x: f"{int(x):02d}:00")
+
+
+# -----------------APANHAS P/ HORA -------------------- #
+df_finalizado = df_apanhas[df_apanhas['Situação'] == 'F']
+df_finalizado['Data Finalização'] = pd.to_datetime(df_finalizado['Data Finalização'])
+df_finalizado['Hora'] = df_finalizado['Data Finalização'].dt.hour
+print(df_apanhas.columns)
+# Transformar a coluna HORA em categórica
+df_finalizado["Hora"] = pd.Categorical(df_finalizado["Hora"], categories=ordem, ordered=True)
+
+# Ordenar o dataframe pelas horas na ordem do turno
+df_finalizado = df_finalizado.sort_values("Hora").reset_index(drop=True)
+
+# Converter para formato HH:00 com 2 dígitos
+df_finalizado["Hora"] = df_finalizado["Hora"].apply(lambda x: f"{int(x):02d}:00")
+
+df_grouped = df_finalizado.copy()
+
+df_grouped = df_grouped[df_grouped['Situação'] == 'F']
+
+df_grouped.groupby('Hora')['Situação'].count()
+
+df_grouped = df_grouped.groupby('Hora')['Situação'].count().reset_index()
+
+
 
 # --- Gráfico de pizza ---
 df_pizza = pd.DataFrame({
@@ -192,7 +216,7 @@ fig_bar.update_layout(
 )
 
 # --- Layout no Streamlit ---
-col_left, col_right = st.columns([1, 2])
+col_left, col_center, col_right = st.columns([1, 1, 2])
 
 with col_left:
     st.subheader("Eficiência da Balança")
@@ -208,6 +232,40 @@ with col_left:
         unsafe_allow_html=True
     )
 
-with col_right:
+with col_center:
     st.subheader("Produtividade Order Start")
     st.plotly_chart(fig_bar, use_container_width=True, height=300)
+
+    fig = px.line(
+        df_grouped,
+        x="Hora",
+        y="Situação",
+        markers=True,
+        title="Quantidade de Apanhas por Hora"
+    )
+with col_right:
+    st.subheader('Apanhas por Hora Separação')
+    # Agrupar
+    df_grouped = df_finalizado.groupby('Hora')['Situação'].count().reset_index()
+
+    # Gráfico de linhas com rótulos
+    fig = px.line(
+        df_grouped,
+        x="Hora",
+        y="Situação",
+        markers=True,
+        title="Quantidade de Apanhas Separadas por Hora",
+        text="Situação"   # Mostra os valores nos pontos
+    )
+
+    fig.update_traces(
+        textposition="top center"  # posição do rótulo
+    )
+
+    fig.update_layout(
+        xaxis_title="Hora do Turno",
+        yaxis_title="Quantidade de Apanhas",
+        hovermode="x unified"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
