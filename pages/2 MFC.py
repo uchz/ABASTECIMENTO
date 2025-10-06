@@ -116,7 +116,7 @@ cols[4].markdown(card("Volumes p/ Indução", pendentes_inducao, "⏳", "#F4511E
 check_weight = df[['Situação','Situação Conferência', 'Num. Picking','Data Início',
                    'Data Finalização','Data Conferência','Usuário Operador','Usuário Conferência']] 
 
-eficiencia = df[(check_weight['Situação'] == 'F') & (df['Situação Conferência'] == 'F')]
+eficiencia = df[(check_weight['Situação'] == 'F') & (check_weight['Situação Conferência'] == 'F')]
 eficiencia = eficiencia.drop_duplicates(subset='Num. Picking')
 
 balanca = eficiencia[eficiencia['Usuário Conferência'] == 'CHECK_WEIGHT']
