@@ -28,7 +28,8 @@ def abastecimento():
 
 df_abastecimento = abastecimento()
 df_abastecimento = df_abastecimento[['CODPROD', 'DESCDESTINO', 'AREA DE SEPA ENDEREçO DESTINO']]
-df_abastecimento = df_abastecimento.drop_duplicates(subset=['CODPROD', 'DESCDESTINO'])
+df_abastecimento['AREA DE SEPA ENDEREçO DESTINO'] = df_abastecimento['AREA DE SEPA ENDEREçO DESTINO'].fillna(value="ESTEIRA MFC")
+df_abastecimento = df_abastecimento.drop_duplicates(subset=['CODPROD', 'AREA DE SEPA ENDEREçO DESTINO'])
 df_abastecimento.sort_values(by='DESCDESTINO', inplace=True)
 
 

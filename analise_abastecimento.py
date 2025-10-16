@@ -57,7 +57,7 @@ def ajustar_data_operacional(df, coluna_datahora):
     df[coluna_datahora] = pd.to_datetime(df[coluna_datahora], dayfirst=True)
 
     # Define limites do turno
-    hora_inicio = 18  # 19:00
+    hora_inicio = 14  # 19:00
     hora_fim = 6      # até 06:00 do dia seguinte
 
     # Criar Data Operacional correta
@@ -81,11 +81,11 @@ def ajustar_data_operacional(df, coluna_datahora):
 # %%
 
 
-df = pd.read_excel('Conferencia_de_Abastecimento.xlsx', header=2)
-df = ajustar_data_operacional(df, 'Data Inicial')
+df = pd.read_csv('data.csv', sep=';', on_bad_lines="skip", engine="python")
+df = ajustar_data_operacional(df, 'Data Finalização')
 
 # %%
-df.to_excel('Conf abastecimento.xlsx')
+df.to_excel('pedidos.xlsx')
 # %%
 
 # %%
