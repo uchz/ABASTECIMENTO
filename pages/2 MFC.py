@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 def ajustar_data_operacional(df, coluna_datahora):
@@ -172,6 +173,39 @@ df_grouped.groupby('Hora')['Situação'].count()
 
 df_grouped = df_grouped.groupby('Hora')['Situação'].count().reset_index()
 
+# -------------------------------------- Caixas p/ Posto -----------------------------------------------------
+
+
+
+df_posto = df.drop_duplicates(subset=['Num. Picking', 'Num. Posto']).sort_values(by='Num. Picking')
+df_posto = df_posto[df_posto['Num. Posto'].notna()]
+df_posto['Num. Posto'] = df_posto['Num. Posto'].astype(str).str.strip()
+
+df_contagem = df_posto.groupby('Num. Posto')['Num. Picking'].count().reset_index()
+df_contagem.columns = ['Num. Posto', 'Quantidade']
+df_contagem = df_contagem.sort_values(by='Quantidade', ascending=False).reset_index(drop=True)
+
+# ------------------------------- APANHAS P/ POSTO ---------------------------------------------
+
+
+apanha_posto = df_apanhas
+apanha_posto = apanha_posto[apanha_posto['Num. Posto'].notna()]
+apanha_posto['Num. Posto'] = apanha_posto['Num. Posto'].astype(str).str.strip()
+
+apanhas_group = apanha_posto.groupby('Num. Posto')['Cod. SKU'].count().reset_index()
+apanhas_group.columns = ['Num. Posto', 'Quantidade']
+apanhas_group = apanhas_group.sort_values(by='Quantidade', ascending=False).reset_index(drop=True)
+
+# -------------------------- TIPOS DE CAIXAS -----------------------------------
+
+df_caixas = df.drop_duplicates(subset= 'Num. Picking').sort_values(by='Num. Picking')
+df_caixas.rename(columns={'Livre 3': 'Tipo'}, inplace=True)
+caixa_group = df_caixas.groupby('Tipo')['Num. Picking'].count().reset_index()
+caixa_group.rename(columns={'Num. Picking': 'Quantidade'})
+caixa_group = caixa_group.sort_values(subset='Quantidade', ascending=False)
+
+st.write(caixa_group)
+
 
 
 # --- Gráfico de pizza ---
@@ -216,7 +250,7 @@ fig_bar.update_layout(
 )
 
 # --- Layout no Streamlit ---
-col_left, col_center, col_right = st.columns([1, 1, 2])
+col_left, col_center, col_right = st.columns([4, 4, 5])
 
 with col_left:
     st.subheader("Eficiência da Balança")
@@ -231,6 +265,59 @@ with col_left:
         """,
         unsafe_allow_html=True
     )
+    # Cria gráfico manual
+    fig = go.Figure(data=[
+        go.Bar(
+            x=list(range(len(df_contagem))),
+            y=df_contagem['Quantidade'],
+            text=df_contagem['Quantidade'],
+            textposition='outside',
+            marker=dict(
+                color='#1E88E5',
+                line=dict(color='rgba(0,0,0,0.6)', width=1)  # borda leve
+            ),
+            hovertemplate='Posto: %{x}<br>Quantidade: %{y}<extra></extra>'
+        )
+    ])
+
+
+    # Layout refinado
+    fig.update_layout(
+        title=dict(
+            text='Total de Volumes Separados p/ Posto',
+            x=0.5,  # centraliza
+            xanchor='center',
+            font=dict(size=20, family='Arial', color='#333')
+        ),
+        xaxis=dict(
+            tickmode='array',
+            tickvals=list(range(len(df_contagem))),
+            ticktext=df_contagem['Num. Posto'],
+            title='Num. Posto',
+            tickangle=-45,  # melhora leitura se tiver muitos postos
+            showgrid=False,
+            zeroline=False
+        ),
+        yaxis=dict(
+            title='Quantidade',
+            showgrid=True,
+            gridcolor='rgba(200,200,200,0.3)'
+        ),
+        bargap=0.15,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        hovermode='x'
+        )
+
+        # Rótulos mais bonitos
+    fig.update_traces(
+
+        textfont=dict(size=12, color='black'),
+        textangle=0,
+        cliponaxis=False
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 with col_center:
     st.subheader("Produtividade Order Start")
@@ -243,6 +330,60 @@ with col_center:
         markers=True,
         title="Quantidade de Apanhas por Hora"
     )
+    st.divider()
+    # Cria gráfico manual
+    fig = go.Figure(data=[
+        go.Bar(
+            x=list(range(len(apanhas_group))),
+            y=apanhas_group['Quantidade'],
+            text=apanhas_group['Quantidade'],
+            textposition='outside',
+            marker=dict(
+                color="#F4511E",
+                line=dict(color='rgba(0,0,0,0.6)', width=1)  # borda leve
+            ),
+            hovertemplate='Posto: %{x}<br>Quantidade: %{y}<extra></extra>'
+        )
+    ])
+
+    # Layout refinado
+    fig.update_layout(
+        title=dict(
+            text='Total de Apanhas Separados p/ Posto',
+            x=0.5,  # centraliza
+            xanchor='center',
+            font=dict(size=20, family='Arial', color='#333')
+        ),
+        xaxis=dict(
+            tickmode='array',
+            tickvals=list(range(len(apanhas_group))),
+            ticktext=df_contagem['Num. Posto'],
+            title='Num. Posto',
+            tickangle=-45,  # melhora leitura se tiver muitos postos
+            showgrid=False,
+            zeroline=False
+        ),
+        yaxis=dict(
+            title='Quantidade',
+            showgrid=True,
+            gridcolor='rgba(200,200,200,0.3)'
+        ),
+        bargap=0.15,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        hovermode='x'
+    )
+
+    # Rótulos mais bonitos
+    fig.update_traces(
+        textfont=dict(size=12, color='black'),
+        textangle=0,
+        cliponaxis=False
+
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
 with col_right:
     st.subheader('Apanhas por Hora Separação')
     # Agrupar
@@ -269,3 +410,9 @@ with col_right:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+
+
+
+
+
