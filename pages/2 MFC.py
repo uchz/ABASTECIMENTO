@@ -47,6 +47,7 @@ df = carregar_dados_onedrive()
 # df = pd.read_excel('archives/geral_pedidos.xlsx')
 
 df = ajustar_data_operacional(df, 'Data Início')
+# st.write(df['Data Operacional'].sort_values(ascending=True).unique()[0])
 
 drop = df['Data Operacional'].sort_values(ascending=True).unique()[0]
 
@@ -198,13 +199,13 @@ apanhas_group = apanhas_group.sort_values(by='Quantidade', ascending=False).rese
 
 # -------------------------- TIPOS DE CAIXAS -----------------------------------
 
-df_caixas = df.drop_duplicates(subset= 'Num. Picking').sort_values(by='Num. Picking')
-df_caixas.rename(columns={'Livre 3': 'Tipo'}, inplace=True)
-caixa_group = df_caixas.groupby('Tipo')['Num. Picking'].count().reset_index()
-caixa_group.rename(columns={'Num. Picking': 'Quantidade'})
-caixa_group = caixa_group.sort_values(subset='Quantidade', ascending=False)
+# df_caixas = df.drop_duplicates(subset= 'Num. Picking').sort_values(by='Num. Picking')
+# df_caixas.rename(columns={'Livre 3': 'Tipo'}, inplace=True)
+# caixa_group = df_caixas.groupby('Tipo')['Num. Picking'].count().reset_index()
+# caixa_group.rename(columns={'Num. Picking': 'Quantidade'})
+# caixa_group = caixa_group.sort_values(subset='Quantidade', ascending=False)
 
-st.write(caixa_group)
+# st.write(caixa_group)
 
 
 

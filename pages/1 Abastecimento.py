@@ -55,6 +55,10 @@ abastecimento_area = abastecimento_area.set_index('Area')
 
 st.dataframe(abastecimento_area)
 
+df_abastec = abastecimento()
+
+st.write(df_abastec.drop_duplicates(subset=['CODPROD', 'CODENDORIGEM']).count())
+
 
 # st.title("Desempenho dos Operadores")
 
@@ -123,101 +127,6 @@ contagem_tipos['Total'] = contagem_tipos.sum(axis=1)
 contagem_tipos.loc['Total'] = contagem_tipos.sum()
 
 
-st.write(' # Status do Abastecimento')
-col3, col4 = st.columns([1,2])
-
-
-with col3:
-
-    st.markdown(
-    "<div style='text-align: center; font-size: 18px;'><b>Tarefas Pendentes P/ Código</b></div>",
-    unsafe_allow_html=True
-    )
-
-
-    st.markdown(
-    f"<div style='text-align: center; font-size: 25px;'><b>{total}</b></div>",
-    unsafe_allow_html=True
-    )
-
-
-    st.divider()
-
-    st.markdown(
-    "<div style='text-align: center; font-size: 20px;'><b>Pendente p/ Área</b></div>",
-    unsafe_allow_html=True
-    )
-
-    # Supondo que você já tem o df_desempenho:
-    total_tipos = df_desempenho.groupby(['Tipo '])['Tipo '].count().reset_index(name='Total')
-    total_tipos = total_tipos.rename(columns={'Tipo ': 'Tipo'})
-
-    # Cria a linha com o total geral
-    linha_total = pd.DataFrame([{'Tipo': 'Total Geral', 'Total': total_tipos['Total'].sum()}])
-
-    # Concatena ao DataFrame
-    total_tipos = pd.concat([total_tipos, linha_total], ignore_index=True)
-
-    # Exibe no Streamlit
-    st.dataframe(abastecimento_area.style.hide(axis='index').set_properties(**{'text-align': 'center'}), width=450)
-
-    
-    
-with col4:
-
-    st.markdown(
-    "<div style='text-align: center; font-size: 18px;'><b>Tarefas Realizadas</b></div>",
-    unsafe_allow_html=True
-    )
-
-
-    st.markdown(
-    f"<div style='text-align: center; font-size: 25px;'><b>{total_tipos['Total'][3]}</b></div>",
-    unsafe_allow_html=True
-    )
-
-    st.divider()
-    
-    import plotly.express as px
-
-    dados_grafico = total_tipos[total_tipos['Tipo'] != 'Total Geral']
-    dados_grafico = dados_grafico.sort_values(by='Total', ascending=False)
-
-    # Cria o gráfico com rótulos
-    fig = px.bar(
-        dados_grafico,
-        x='Tipo',
-        y='Total',
-        color='Tipo',
-        text_auto=True,  # Rótulos automáticos
-        width=500,
-        height=300
-    )
-
-    # Ajustes visuais
-    fig.update_traces(
-        textfont_size=14,
-        textangle=0,
-        textposition="outside",
-        cliponaxis=False  # Permite texto sair do eixo Y
-    )
-
-    fig.update_layout(
-        yaxis_title='Quantidade',
-        xaxis_title='Tipo',
-        uniformtext_minsize=8,
-        uniformtext_mode='hide',
-        margin=dict(t=20, b=40),
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-# st.header('Abastecimentos por Empilhador')
-# with col1:
-#     st.write(abastecimento_area)
-
-# with col2:
-#     st.write(contagem_tipos)
 
 cores = sns.color_palette('afmhot', len(contagem_tipos.columns[:-1]))
 tipos = contagem_tipos.columns[:-1]
