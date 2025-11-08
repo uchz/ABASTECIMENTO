@@ -174,6 +174,8 @@ df_grouped.groupby('Hora')['Situação'].count()
 
 df_grouped = df_grouped.groupby('Hora')['Situação'].count().reset_index()
 
+
+
 # -------------------------------------- Caixas p/ Posto -----------------------------------------------------
 
 
@@ -206,6 +208,8 @@ apanhas_group = apanhas_group.sort_values(by='Quantidade', ascending=False).rese
 # caixa_group = caixa_group.sort_values(subset='Quantidade', ascending=False)
 
 # st.write(caixa_group)
+
+# -------------------------- APANHAS POSTO HORA ---------------------------- #
 
 
 
