@@ -119,29 +119,65 @@ def tabela_produtos(df: pd.DataFrame):
     fig = px.bar(g, x="Produto", y="Tarefas", title="🏷️ Produtos mais Abastecidos", text_auto=True)
     st.plotly_chart(fig, use_container_width=True)
 
-def indicadores_avancados(df: pd.DataFrame):
-    st.subheader("⚙️ Indicadores Avançados")
+# =============================
+# 🚀 Abastecimentos por Hora
+# =============================
+def grafico_abastecimentos(df: pd.DataFrame):
     if "usuario" not in df.columns or "duracao_h" not in df.columns:
         st.info("Colunas insuficientes para cálculo.")
         return
 
-    prod = df.groupby("usuario").agg(tarefas=("usuario", "count"), horas=("duracao_h", "sum"))
+    prod = df.groupby("usuario").agg(
+        tarefas=("usuario", "count"),
+        horas=("duracao_h", "sum")
+    ).reset_index()
+    prod = prod[prod["horas"] > 0]
+    prod["abast_por_hora"] = prod["tarefas"] / prod["horas"]
+
+    fig = px.bar(
+        prod.sort_values("abast_por_hora", ascending=False),
+        x="usuario",
+        y="abast_por_hora",
+        text_auto=".2f",
+        title="🚀 Abastecimentos por Hora Ativa (real)"
+    )
+    fig.update_layout(height=420, xaxis_tickangle=-35)
+    st.plotly_chart(fig, use_container_width=True)
+
+    media_geral = prod["abast_por_hora"].mean()
+    st.caption(f"Média geral: {media_geral:.2f} abast/hora")
+
+
+# =============================
+# 🎯 Eficiência Relativa
+# =============================
+def grafico_eficiencia(df: pd.DataFrame):
+    if "usuario" not in df.columns or "duracao_h" not in df.columns:
+        st.info("Colunas insuficientes para cálculo.")
+        return
+
+    prod = df.groupby("usuario").agg(
+        tarefas=("usuario", "count"),
+        horas=("duracao_h", "sum")
+    ).reset_index()
     prod = prod[prod["horas"] > 0]
     prod["abast_por_hora"] = prod["tarefas"] / prod["horas"]
     media_geral = prod["abast_por_hora"].mean()
     prod["eficiencia_relativa_%"] = (prod["abast_por_hora"] / media_geral) * 100
 
-    c1, c2 = st.columns(2)
-    fig1 = px.bar(prod.sort_values("abast_por_hora", ascending=False).reset_index(),
-                  x="usuario", y="abast_por_hora", title="Produtividade — Abastecimentos por Hora")
-    c1.plotly_chart(fig1, use_container_width=True)
+    fig = px.bar(
+        prod.sort_values("eficiencia_relativa_%", ascending=False),
+        x="usuario",
+        y="eficiencia_relativa_%",
+        text_auto=".1f",
+        title="🎯 Eficiência Relativa (média = 100%)"
+    )
+    fig.add_hline(y=100, line_dash="dash", line_color="gray")
+    fig.update_layout(height=420, xaxis_tickangle=-35)
+    st.plotly_chart(fig, use_container_width=True)
 
-    fig2 = px.bar(prod.sort_values("eficiencia_relativa_%", ascending=False).reset_index(),
-                  x="usuario", y="eficiencia_relativa_%", title="Eficiência Relativa (média = 100%)")
-    fig2.add_hline(y=100, line_dash="dash", line_color="gray")
-    c2.plotly_chart(fig2, use_container_width=True)
+    st.caption("Acima de 100% = acima da média | Abaixo de 100% = abaixo da média")
 
-    st.caption(f"Média geral: {media_geral:.2f} abast/hora")
 
 # =============================
 # Interface principal
@@ -162,15 +198,22 @@ if df is None or len(df) == 0:
 # Filtros laterais
 # =============================
 st.sidebar.header("🔍 Filtros")
+
 if "data_operacional_ajustada" in df.columns and df["data_operacional_ajustada"].notna().any():
     min_dt = pd.to_datetime(df["data_operacional_ajustada"].min())
     max_dt = pd.to_datetime(df["data_operacional_ajustada"].max())
+
+    # 👉 valor padrão = última data disponível
+    start = max_dt.date()
+    end = max_dt.date()
+
     start, end = st.sidebar.date_input(
         "Período (dia operacional)",
-        value=(min_dt.date(), max_dt.date()),
+        value=(start, end),
         min_value=min_dt.date(),
         max_value=max_dt.date(),
     )
+
     mask = (
         (df["data_operacional_ajustada"] >= pd.to_datetime(start)) &
         (df["data_operacional_ajustada"] <= pd.to_datetime(end) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1))
@@ -187,23 +230,27 @@ if "usuario" in df.columns:
 # Corpo principal
 # =============================
 st.title("📦 Dashboard de Abastecimentos")
-st.caption("_Período operacional: 19h → 06h (dia seguinte)_")
+# st.caption("_Período operacional: 19h → 06h (dia seguinte)_")
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Tarefas", f"{len(df):,}")
-col2.metric("Operadores", f"{df['usuario'].nunique():,}")
-col3.metric("% Corretivo", f"{df['eh_corretivo'].mean()*100:.1f}%")
-col4.metric("Duração média (min)", f"{df['duracao_min'].mean():.1f}")
+# col4.metric("Operadores", f"{df['usuario'].nunique():,}")
+col2.metric("% Corretivo", f"{df['eh_corretivo'].mean()*100:.1f}%")
+col3.metric("Duração média (min)", f"{df['duracao_min'].mean():.1f}")
+col4.write('                                   ')
 
 with col1:
 
     chart_timeseries(df)
 with col2:
     chart_operadores(df)
+with col3:
+    grafico_abastecimentos(df)
+with col4:
+    
+    grafico_eficiencia(df)
+
 tabela_produtos(df)
-indicadores_avancados(df)
-
-
 st.markdown("---")
 st.caption("_Dashboard otimizado — foco em produtividade e eficiência durante o turno noturno._")
 
