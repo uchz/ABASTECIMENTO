@@ -8,7 +8,12 @@ import plotly.graph_objects as go
 
 def ajustar_data_operacional(df, coluna_datahora):
     # Converte a coluna para datetime
-    df[coluna_datahora] = pd.to_datetime(df[coluna_datahora], dayfirst=True)
+    df[coluna_datahora] = pd.to_datetime(
+        df[coluna_datahora],
+        format="mixed",
+        dayfirst=True,
+        errors="coerce"
+    )
 
     # Define os limites de horário
     hora_inicio = pd.to_datetime("19:00:00").time()
@@ -27,32 +32,50 @@ def ajustar_data_operacional(df, coluna_datahora):
 
     return df_filtrado
 
-  # atualiza a cada 60 segundos
-def carregar_dados_onedrive():
-    caminho = r"C:\\Users\\luis.silva\Documents\\OneDrive - LLE Ferragens\\MFC\\geral_pedidos.csv"
-    df = pd.read_csv(caminho, sep=";", on_bad_lines="skip", engine="python")
-    return df
+st.sidebar.header("📁 Upload de Arquivos")
 
-def carregar_dados_drive():
-    caminhos = r"C:\\Users\\luis.silva\Documents\\OneDrive - LLE Ferragens\\MFC\\order_start.csv"
-    order_start = pd.read_csv(caminhos, sep=";", on_bad_lines="skip", engine="python")
-    return order_start
+arquivo_geral = st.sidebar.file_uploader(
+    "Carregar geral_pedidos.csv",
+    type=["csv"]
+)
 
-df = carregar_dados_onedrive()
+arquivo_order = st.sidebar.file_uploader(
+    "Carregar order_start.csv",
+    type=["csv"]
+)
 
-order_start = carregar_dados_drive()
+# --- Leitura dos dados ---
+if arquivo_geral is not None:
+    df = pd.read_csv(arquivo_geral, sep=";", on_bad_lines="skip", engine="python")
+else:
+    st.warning("Envie o arquivo geral_pedidos.csv para continuar.")
+    st.stop()
+
+if arquivo_order is not None:
+    order_start = pd.read_csv(arquivo_order, sep=";", on_bad_lines="skip", engine="python")
+else:
+    st.warning("Envie o arquivo order_start.csv para continuar.")
+    st.stop()
 
 
-df = carregar_dados_onedrive()
+# df = carregar_dados_onedrive()
+
+# order_start = carregar_dados_drive()
+
+
+# df = carregar_dados_onedrive()
 # df = pd.read_excel('archives/geral_pedidos.xlsx')
 
 df = ajustar_data_operacional(df, 'Data Início')
 # st.write(df['Data Operacional'].sort_values(ascending=True).unique()[0])
+remover_primeiro_dia = st.sidebar.checkbox(
+    "Remover o primeiro dia operacional",
+    value=True  # já deixa ativado como padrão
+)
 
-drop = df['Data Operacional'].sort_values(ascending=True).unique()[0]
-
-
-df = df[df['Data Operacional'] != drop]
+if remover_primeiro_dia:
+    drop = df['Data Operacional'].sort_values(ascending=True).unique()[0]
+    df = df[df['Data Operacional'] != drop]
 
 # --- Configurações da página ---
 st.set_page_config(page_title="Acompanhamento MFC", layout="wide")
@@ -154,7 +177,12 @@ order_start["HORA"] = order_start["HORA"].apply(lambda x: f"{int(x):02d}:00")
 
 # -----------------APANHAS P/ HORA -------------------- #
 df_finalizado = df_apanhas[df_apanhas['Situação'] == 'F']
-df_finalizado['Data Finalização'] = pd.to_datetime(df_finalizado['Data Finalização'])
+df_finalizado['Data Finalização'] = pd.to_datetime(
+    df_finalizado['Data Finalização'],
+    format="mixed",
+    dayfirst=True,
+    errors="coerce"
+)
 df_finalizado['Hora'] = df_finalizado['Data Finalização'].dt.hour
 print(df_apanhas.columns)
 # Transformar a coluna HORA em categórica

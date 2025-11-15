@@ -850,3 +850,6 @@ st.markdown(
     _Dica_: Ajuste os filtros e o **Top N** para enxergar gargalos, operadores abaixo/acima da média e horários de pico.
     """
 )
+
+
+
