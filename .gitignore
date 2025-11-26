@@ -1,1 +1,30 @@
-"venv/" 
+# --- AMBIENTE VIRTUAL ---
+venv/
+venv311/
+.env/
+.venv/
+
+# --- ARQUIVOS PYTHON ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- CONFIGURAÇÕES / LOGS ---
+*.log
+
+# --- PACOTES / BUILD ---
+build/
+dist/
+*.egg-info/
+
+# --- JUPYTER ---
+.ipynb_checkpoints/
+
+# --- SISTEMA ---
+.DS_Store
+Thumbs.db
+
+# --- STREAMLIT ---
+.streamlit/secrets.toml
+.stream
