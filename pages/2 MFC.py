@@ -204,7 +204,6 @@ df_finalizado["Hora"] = df_finalizado["Hora"].apply(lambda x: f"{int(x):02d}:00"
 
 df_grouped = df_finalizado.groupby("Hora")["Situação"].count().reset_index()
 
-
 # ============================================================
 # CAIXAS POR POSTO
 # ============================================================
@@ -293,120 +292,186 @@ with col_right:
 
 st.divider(width=5)
 # ---------------------------------- PRODUTIVIDADE SEPARAÇÕES ------------------------------
-st.markdown("# Produtividade Separação")
-
-col1, col2, col3 = st.columns([4, 4, 5])
 
 # ============================
 # APANHAS POR POSTO
 # ============================
+# ============================
+# Cores padrão
+# ============================
+COR_APANHAS = "#FBC02D"   # Amarelo
+COR_VOLUMES = "#1E88E5"   # Azul
+BORDA = "rgba(0,0,0,0.5)"
+
+# ============================
+# Função para criar gráfico padrão
+# ============================
+def criar_grafico_barra(x_vals, y_vals, labels, titulo, cor):
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=x_vals,
+                y=y_vals,
+                text=y_vals,
+                textposition="outside",
+                marker=dict(
+                    color=cor,
+                    line=dict(color=BORDA, width=1)
+                ),
+                hovertemplate="Posto: %{x}<br>Quantidade: %{y}<extra></extra>"
+            )
+        ]
+    )
+
+    fig.update_layout(
+        title=dict(
+            text=titulo,
+            x=0.5, xanchor="center",
+            font=dict(size=20, family="Arial", color="#333")
+        ),
+        xaxis=dict(
+            tickmode="array",
+            tickvals=x_vals,
+            ticktext=labels,
+            title="Num. Posto",
+            tickangle=-45,
+            showgrid=False,
+            zeroline=False
+        ),
+        yaxis=dict(
+            title="Quantidade",
+            showgrid=True,
+            gridcolor="rgba(200,200,200,0.3)"
+        ),
+        bargap=0.15,
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        hovermode="x"
+    )
+
+    fig.update_traces(
+        textfont=dict(size=12, color="black"),
+        textangle=0,
+        cliponaxis=False
+    )
+
+    return fig
+
+
+# ============================
+# SEÇÃO: PRODUTIVIDADE SEPARAÇÃO
+# ============================
+st.markdown("# Produtividade Separação")
+
+col1, col2 = st.columns([2,2])
+
+# APANHAS POR POSTO
 with col1:
-    fig = go.Figure(
+
+
+    st.subheader("📊 Apanhas por Operador (Ordenado)")
+
+    # Agrupar e ordenar
+    apanhas_operador = (
+        df_apanhas.groupby("Usuário Operador")["Usuário Operador"]
+        .count()
+        .reset_index(name="Quantidade")
+        .sort_values("Quantidade", ascending=False)
+    )
+
+    fig_operadores = go.Figure(
         data=[
             go.Bar(
-                x=list(range(len(apanhas_group))),
-                y=apanhas_group["Quantidade"],
-                text=apanhas_group["Quantidade"],
+                x=apanhas_operador["Usuário Operador"],
+                y=apanhas_operador["Quantidade"],
+                text=apanhas_operador["Quantidade"],
                 textposition="outside",
                 marker=dict(
-                    color="#F4511E",
-                    line=dict(color="rgba(0,0,0,0.6)", width=1)  # borda leve
-                ),
-                hovertemplate="Posto: %{x}<br>Quantidade: %{y}<extra></extra>"
+                    color="#0904A6",  # Amarelo para combinar com o restante
+                    line=dict(color="rgba(0,0,0,0.5)", width=1)
+                )
             )
         ]
     )
 
-    fig.update_layout(
+    fig_operadores.update_layout(
         title=dict(
-            text="Total de Apanhas Separados p/ Posto",
-            x=0.5,
-            xanchor="center",
-            font=dict(size=20, family="Arial", color="#333")
+            text="Apanhas por Operador",
+            x=0.5, xanchor="center",
+            font=dict(size=22)
         ),
         xaxis=dict(
-            tickmode="array",
-            tickvals=list(range(len(apanhas_group))),
-            ticktext=apanhas_group["Num. Posto"],
-            title="Num. Posto",
-            tickangle=-45,
-            showgrid=False,
-            zeroline=False
+            title="Operador",
+            tickangle=-45
         ),
         yaxis=dict(
-            title="Quantidade",
+            title="Quantidade de Apanhas",
             showgrid=True,
             gridcolor="rgba(200,200,200,0.3)"
         ),
-        bargap=0.15,
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
-        hovermode="x"
     )
 
-    fig.update_traces(
+    fig_operadores.update_traces(
         textfont=dict(size=12, color="black"),
-        textangle=0,
         cliponaxis=False
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig_operadores, use_container_width=True)
 
 
-# ============================
+    fig_apanhas = criar_grafico_barra(
+        x_vals=list(range(len(apanhas_group))),
+        y_vals=apanhas_group["Quantidade"],
+        labels=apanhas_group["Num. Posto"],
+        titulo="Total de Apanhas Separados p/ Posto",
+        cor=COR_APANHAS
+    )
+    st.plotly_chart(fig_apanhas, use_container_width=True, key="apanhas_chart")
+
+
+
+
+
 # VOLUMES POR POSTO
-# ============================
 with col2:
-    fig = go.Figure(
-        data=[
-            go.Bar(
-                x=list(range(len(df_contagem))),
-                y=df_contagem["Quantidade"],
-                text=df_contagem["Quantidade"],
-                textposition="outside",
-                marker=dict(
-                    color="#1E88E5",
-                    line=dict(color="rgba(0,0,0,0.6)", width=1)  # borda leve
-                ),
-                hovertemplate="Posto: %{x}<br>Quantidade: %{y}<extra></extra>"
-            )
-        ]
+
+    # Agrupar por operador e hora
+    tabela = (
+        df_finalizado
+        .groupby(['Usuário Operador', 'Hora'])
+        .size()
+        .reset_index(name='Quantidade')
     )
 
-    fig.update_layout(
-        title=dict(
-            text="Total de Volumes Separados p/ Posto",
-            x=0.5,
-            xanchor="center",
-            font=dict(size=20, family="Arial", color="#333")
-        ),
-        xaxis=dict(
-            tickmode="array",
-            tickvals=list(range(len(df_contagem))),
-            ticktext=df_contagem["Num. Posto"],
-            title="Num. Posto",
-            tickangle=-45,
-            showgrid=False,
-            zeroline=False
-        ),
-        yaxis=dict(
-            title="Quantidade",
-            showgrid=True,
-            gridcolor="rgba(200,200,200,0.3)"
-        ),
-        bargap=0.15,
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        hovermode="x"
+    # Criar tabela pivotada
+    tabela_pivot = tabela.pivot_table(
+        index='Usuário Operador',   # linhas
+        columns='Hora',             # colunas da tabela
+        values='Quantidade',        # valores
+        fill_value=0                # onde não existe valor, coloca 0
     )
 
-    fig.update_traces(
-        textfont=dict(size=12, color="black"),
-        textangle=0,
-        cliponaxis=False
-    )
+    # Ordenar usuários pelo total somado
+    tabela_pivot["TOTAL"] = tabela_pivot.sum(axis=1)
+    tabela_pivot = tabela_pivot.sort_values("TOTAL", ascending=False)
 
-    st.plotly_chart(fig, use_container_width=True)
+    # Jogar para o Streamlit
+    st.subheader("📊 Produtividade por Hora e Operador (Matriz)")
+    st.dataframe(tabela_pivot, use_container_width=True)
+
+    fig_volumes = criar_grafico_barra(
+        x_vals=list(range(len(df_contagem))),
+        y_vals=df_contagem["Quantidade"],
+        labels=df_contagem["Num. Posto"],
+        titulo="Total de Volumes Separados p/ Posto",
+        cor=COR_VOLUMES
+    )
+    st.plotly_chart(fig_volumes, use_container_width=True, key="volumes_chart")
+
+
+
 
 
 # Seu st.altair_chart() estava solto e sem gráfico
