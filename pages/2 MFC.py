@@ -258,6 +258,16 @@ fig_pizza.update_layout(
 with col_left:
     st.subheader("Eficiência da Balança")
     st.plotly_chart(fig_pizza, use_container_width=True)
+    st.markdown(
+    f"""
+    <div style="text-align: center; font-size:16px;">
+        <b>Volumes Finalizados:</b> {total}  <br>
+        <b style="color:#1E88E5;">Balança:</b> {total_bal} ({perc_bal:.2f}%)  <br>
+        <b style="color:#F4511E;">Reconferência:</b> {total_reconf} ({perc_reconf:.2f}%)
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
 
 
 
@@ -363,13 +373,109 @@ def criar_grafico_barra(x_vals, y_vals, labels, titulo, cor):
 # ============================
 st.markdown("# Produtividade Separação")
 
-col1, col2 = st.columns([2,2])
+col1, col2 = st.columns([2,2.4])
+
+import numpy as np
+
+# ============================================
+#       REMOVER OUTLIERS POR IQR
+# ============================================
+def remover_outliers_baixos(series):
+    """Remove somente outliers absurdamente baixos usando o método do IQR."""
+    Q1 = series.quantile(0.25)
+    Q3 = series.quantile(0.75)
+    IQR = Q3 - Q1
+    lim_inferior = Q1 - 1.5 * IQR
+    # remove apenas valores abaixo do limite inferior
+    return series[series >= lim_inferior]
+
+
+# ============================================
+#       CÁLCULO DAS MÉTRICAS
+# ============================================
+tabela = (
+    df_finalizado
+    .groupby(['Usuário Operador', 'Hora'])
+    .size()
+    .reset_index(name='Quantidade')
+)
+
+# Total apanhas por operador
+apanhas_por_operador = df_finalizado.groupby("Usuário Operador")["Usuário Operador"].value_counts()
+apanhas_por_operador = apanhas_por_operador[apanhas_por_operador > 40]
+# Remover outliers
+apanhas_sem_outlier = remover_outliers_baixos(apanhas_por_operador)
+
+
+
+# Média final
+media_apanhas_por_operador = apanhas_sem_outlier.mean()
+
+
+# --- Produtividade por hora ---
+prod_por_hora = (
+    tabela.groupby(["Usuário Operador", "Hora"])["Quantidade"].sum()
+)
+
+prod_por_hora = prod_por_hora[prod_por_hora > 3]
+prod_por_hora_sem_outlier = remover_outliers_baixos(prod_por_hora)
+
+media_apanhas_por_hora = prod_por_hora_sem_outlier.mean()
+
+
+# ============================================
+#       CARDS DE ESTILO
+# ============================================
+
+card_style = """
+    <div style="
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        text-align: center;
+        border-left: 10px solid #1E88E5;
+    ">
+        <h3 style="margin-bottom: 5px;">{titulo}</h3>
+        <h1 style="color:#1E88E5; margin-top:0;">{valor}</h1>
+    </div>
+"""
+
+
+
+colunas = st.columns(4)
+
+with colunas[1]:
+        
+        st.markdown(
+        card_style.format(
+            titulo="Média de Apanhas por Operador",
+            valor=f"{media_apanhas_por_operador:,.1f}"
+        ),
+        unsafe_allow_html=True
+        )
+
+with colunas[2]:
+        st.markdown(
+        card_style.format(
+        titulo="Média de Apanhas por Operador por Hora",
+        valor=f"{media_apanhas_por_hora:,.2f}"
+    ),
+    unsafe_allow_html=True
+    )
+
+
+
+
+col1, col2 = st.columns(2)
+
 
 # APANHAS POR POSTO
 with col1:
 
 
-    st.subheader("📊 Apanhas por Operador (Ordenado)")
+
+    st.subheader("📊 Apanhas por Operador")
 
     # Agrupar e ordenar
     apanhas_operador = (
@@ -433,9 +539,9 @@ with col1:
 
 
 
-
 # VOLUMES POR POSTO
 with col2:
+
 
     # Agrupar por operador e hora
     tabela = (
@@ -458,7 +564,7 @@ with col2:
     tabela_pivot = tabela_pivot.sort_values("TOTAL", ascending=False)
 
     # Jogar para o Streamlit
-    st.subheader("📊 Produtividade por Hora e Operador (Matriz)")
+    st.subheader("📊 Produtividade por Hora e Operador")
     st.dataframe(tabela_pivot, use_container_width=True)
 
     fig_volumes = criar_grafico_barra(
@@ -477,3 +583,6 @@ with col2:
 # Seu st.altair_chart() estava solto e sem gráfico
 # Mantive aqui para você adicionar quando quiser
 # st.altair_chart(fig_altair, use_container_width=True)
+
+
+
