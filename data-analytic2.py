@@ -1149,5 +1149,3 @@ with tab5:
 
     st.write(resultado_final)
 
-
-

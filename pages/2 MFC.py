@@ -301,6 +301,75 @@ with col_right:
 
 
 st.divider(width=5)
+
+
+# Filtrar apenas pendências
+pendentes = df[df['Situação'] == 'P']
+
+# Ordenar pelo índice original (mantendo o mais antigo)
+pendentes = pendentes.sort_index()
+
+# Selecionar o primeiro registro pendente por Num. Picking
+resultado = (
+    pendentes.groupby('Num. Picking')
+    .agg({
+        'Livre 4': 'first',   # OC
+        'Num. Posto': 'first'     # Posto pendente mais antigo
+    })
+    .reset_index()
+)
+
+# Reordenar colunas
+resultado_formatado = resultado.rename(columns={
+    'Livre 4': 'OC',
+    'Num. Picking': 'Picking',
+    'Num. Posto': 'Posto'
+})[['OC', 'Picking', 'Posto']]
+
+# Função de classificação
+def classificar_posto(posto):
+    try:
+        p = int(posto)
+    except:
+        return "Desconhecido"
+
+    if 1 <= p <= 3 :
+        return "Crítico"
+    elif p == 101:
+        return "Crítico"
+    elif 4 <= p <= 9:
+        return "Atenção"
+    else:
+        return "Normal"
+
+resultado_formatado['Status'] = resultado_formatado['Posto'].apply(classificar_posto)
+
+
+# Função de cores
+def colorir_status(val):
+    if val == "Crítico":
+        return 'background-color: #ff9999; color: black; font-weight: bold;'   # vermelho claro
+    elif val == "Atenção":
+        return 'background-color: #ffe599; color: black;'                     # amarelo
+    elif val == "Normal":
+        return 'background-color: #b6d7a8; color: black;'                     # verde claro
+    return ''
+
+
+# Aplicar estilo
+tabela_colorida = (
+    resultado_formatado
+    .style
+    .applymap(colorir_status, subset=['Status'])
+    .set_properties(**{
+        'font-size': '12pt',
+        'border': '1px solid #ddd',
+        'padding': '6px'
+    })
+)
+
+st.dataframe(tabela_colorida, width=800, height=500)
+
 # ---------------------------------- PRODUTIVIDADE SEPARAÇÕES ------------------------------
 
 # ============================
@@ -417,10 +486,18 @@ prod_por_hora = (
     tabela.groupby(["Usuário Operador", "Hora"])["Quantidade"].sum()
 )
 
-prod_por_hora = prod_por_hora[prod_por_hora > 3]
+prod_por_hora = prod_por_hora[prod_por_hora > 10]
 prod_por_hora_sem_outlier = remover_outliers_baixos(prod_por_hora)
 
 media_apanhas_por_hora = prod_por_hora_sem_outlier.mean()
+
+
+
+
+# Seu st.altair_chart() estava solto e sem gráfico
+# Mantive aqui para você adicionar quando quiser
+# st.altair_chart(fig_altair, use_container_width=True)
+
 
 
 # ============================================
@@ -430,8 +507,8 @@ media_apanhas_por_hora = prod_por_hora_sem_outlier.mean()
 card_style = """
     <div style="
         background-color: #ffffff;
-        border-radius: 15px;
-        padding: 20px;
+        border-radius: 10px;
+        padding: 15px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         text-align: center;
         border-left: 10px solid #1E88E5;
@@ -443,7 +520,7 @@ card_style = """
 
 
 
-colunas = st.columns(4)
+colunas = st.columns([2,2,2,2])
 
 with colunas[1]:
         
@@ -452,7 +529,8 @@ with colunas[1]:
             titulo="Média de Apanhas por Operador",
             valor=f"{media_apanhas_por_operador:,.1f}"
         ),
-        unsafe_allow_html=True
+        unsafe_allow_html=True, 
+        
         )
 
 with colunas[2]:
@@ -461,7 +539,8 @@ with colunas[2]:
         titulo="Média de Apanhas por Operador por Hora",
         valor=f"{media_apanhas_por_hora:,.2f}"
     ),
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
+    
     )
 
 
@@ -575,14 +654,6 @@ with col2:
         cor=COR_VOLUMES
     )
     st.plotly_chart(fig_volumes, use_container_width=True, key="volumes_chart")
-
-
-
-
-
-# Seu st.altair_chart() estava solto e sem gráfico
-# Mantive aqui para você adicionar quando quiser
-# st.altair_chart(fig_altair, use_container_width=True)
 
 
 
