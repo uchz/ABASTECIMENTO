@@ -25,6 +25,8 @@ if arquivo is None:
 
 
 df = pd.read_excel(arquivo, header=2)
+df['NUTAREFA'] = df['NUTAREFA'].astype(str).str.replace('.0', '', regex=False).replace('nan', '') + ','
+
 
 def definir_cancela(rua):
     if 1 <= rua <= 23:
@@ -80,4 +82,3 @@ for col in df_tarefas.columns:
 st.subheader("📊 Tarefas por Cancela")
 st.write(df_tarefas)
 
-st.write(df)
