@@ -333,11 +333,11 @@ def classificar_posto(posto):
     except:
         return "Desconhecido"
 
-    if 1 <= p <= 3 :
+    if 1 <= p <= 5 :
         return "Crítico"
     elif p == 101:
         return "Crítico"
-    elif 4 <= p <= 9:
+    elif 6 <= p <= 12:
         return "Atenção"
     else:
         return "Normal"
