@@ -37,7 +37,7 @@ df = pd.read_csv('data.csv', sep=";", on_bad_lines="skip", engine="python")
 df = ajustar_data_operacional(df, 'Data Início')
 
 # %%
-df.to_excel('expedicao 24-27.xlsx')
+df.to_excel('expedicao 27-30.xlsx')
 # %%
 
 df = pd.read_csv('C:\\Users\\luis.silva\Documents\\OneDrive - LLE Ferragens\\MFC\\geral_pedidos.csv', sep=";", on_bad_lines="skip", engine="python")

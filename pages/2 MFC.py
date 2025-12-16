@@ -215,6 +215,17 @@ df_posto = (
 
 df_posto['Num. Posto'] = df_posto['Num. Posto'].astype(str).str.strip()
 
+df_posto_finalizado = df_posto[df_posto['Situação'] == 'F'].copy()
+df_posto_finalizado["Data Finalização"] = pd.to_datetime(df_posto_finalizado["Data Finalização"], errors="coerce")
+df_posto_finalizado["Hora"] = df_posto_finalizado["Data Finalização"].dt.hour
+
+df_posto_finalizado["Hora"] = pd.Categorical(df_posto_finalizado["Hora"],categories=ordem, ordered=False)
+df_posto_finalizado = df_posto_finalizado.sort_values("Hora")
+
+df_posto_finalizado["Hora"] = df_posto_finalizado["Hora"].apply(lambda x: f"{int(x):02d}:00" if pd.notna(x) else None)
+
+df_grouped = df_posto_finalizado.groupby("Hora")["Situação"].count().reset_index()
+
 df_contagem = df_posto.groupby("Num. Posto")["Num. Picking"].count().reset_index()
 df_contagem.columns = ["Num. Posto", "Quantidade"]
 df_contagem = df_contagem.sort_values("Quantidade", ascending=False)
@@ -549,7 +560,7 @@ with colunas[2]:
 col1, col2 = st.columns(2)
 
 
-# APANHAS POR POSTO
+# APANHAS POR OPERADOR / POSTO
 with col1:
 
 
@@ -605,7 +616,30 @@ with col1:
 
     st.plotly_chart(fig_operadores, use_container_width=True)
 
+        # Agrupar por operador e hora
+    tabela = (
+        df_posto_finalizado
+        .groupby(['Usuário Operador', 'Hora'])
+        .size()
+        .reset_index(name='Quantidade')
+    )
 
+    # Criar tabela pivotada
+    tabela_pivot = tabela.pivot_table(
+        index='Usuário Operador',   # linhas
+        columns='Hora',             # colunas da tabela
+        values='Quantidade',        # valores
+        fill_value=0                # onde não existe valor, coloca 0
+    )
+
+    # Ordenar usuários pelo total somado
+    tabela_pivot["TOTAL"] = tabela_pivot.sum(axis=1)
+    tabela_pivot = tabela_pivot.sort_values("TOTAL", ascending=False)
+
+    # Jogar para o Streamlit
+    st.subheader("📊 Produtividade de Volumes por Hora e Operador")
+    st.dataframe(tabela_pivot, use_container_width=True)
+    
     fig_apanhas = criar_grafico_barra(
         x_vals=list(range(len(apanhas_group))),
         y_vals=apanhas_group["Quantidade"],
@@ -621,6 +655,49 @@ with col1:
 # VOLUMES POR POSTO
 with col2:
 
+    st.divider()
+    operador_posto = df_posto['Usuário Operador'].value_counts()
+
+    fig_operadores = go.Figure(
+        data=[
+            go.Bar(
+                x=operador_posto.index,      # Operadores
+                y=operador_posto.values,     # Quantidade
+                text=operador_posto.values,  # Texto em cima da barra
+                textposition="outside",
+                marker=dict(
+                    color="#2A57B9",
+                    line=dict(color="rgba(0,0,0,0.5)", width=1)
+                )
+            )
+        ]
+    )
+
+    fig_operadores.update_layout(
+    title=dict(
+        text="Volumes por Operador",
+        x=0.5, xanchor="center",
+        font=dict(size=22)
+    ),
+    xaxis=dict(
+        title="Operador",
+        tickangle=-45
+    ),
+    yaxis=dict(
+        title="Quantidade de Volumes",
+        showgrid=True,
+        gridcolor="rgba(200,200,200,0.3)"
+    ),
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
+    )
+
+    fig_operadores.update_traces(
+        textfont=dict(size=12, color="black"),
+        cliponaxis=False
+    )
+
+    st.plotly_chart(fig_operadores, use_container_width=True)
 
     # Agrupar por operador e hora
     tabela = (
@@ -643,7 +720,7 @@ with col2:
     tabela_pivot = tabela_pivot.sort_values("TOTAL", ascending=False)
 
     # Jogar para o Streamlit
-    st.subheader("📊 Produtividade por Hora e Operador")
+    st.subheader("📊 Produtividade de Apanhas por Hora e Operador")
     st.dataframe(tabela_pivot, use_container_width=True)
 
     fig_volumes = criar_grafico_barra(

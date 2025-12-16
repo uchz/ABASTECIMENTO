@@ -23,7 +23,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Abastecimentos — Dashboard", layout="wide", initial_sidebar_state="expanded")
 
-DEFAULT_DIR = "C:/Users/luis.silva/Documents/OneDrive - LLE Ferragens/BASE PBI"
+DEFAULT_DIR = "C:\\Users\luis.silva\Documents\\OneDrive - LLE Ferragens\\BASE PBI"
 DEFAULT_PATH = os.path.join(DEFAULT_DIR, "Abastecimentos.xlsx")
 
 # =============================
@@ -760,7 +760,7 @@ def tabela_origem_destino(df: pd.DataFrame, top_n: int = 15):
 # -----------------------------
 
 st.sidebar.header("Dados")
-up = st.sidebar.file_uploader("Carregue o Excel de Abastecimentos (aba BASE)", type=["xlsx"])
+up = st.sidebar.file_uploader("Carregue o Excel de Abastecimentos (aba BASE)", type=["xls","xlsx"])
 
 default_path = "/mnt/data/Abastecimentos.xlsx"  # funciona no ChatGPT; ajuste no seu ambiente local
 
