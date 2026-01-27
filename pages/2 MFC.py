@@ -1,4 +1,6 @@
 import streamlit as st
+st.set_page_config(page_title="Acompanhamento MFC", layout="wide")
+st.title("Resumo MFC")
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -99,8 +101,7 @@ if remover_primeiro_dia:
 # ============================================================
 # CONFIGURAÇÕES INICIAIS
 # ============================================================
-st.set_page_config(page_title="Acompanhamento MFC", layout="wide")
-st.title("Resumo MFC")
+
 
 df_apanhas = df.drop_duplicates(subset=['Cod. SKU', 'Num. Pedido']).copy()
 
