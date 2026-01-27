@@ -5,8 +5,9 @@ seaborn
 numpy
 xlrd
 openpyxl
-altair
+altair<5
 scikit-learn
 datetime
-streamlit_extras
+streamlit-extras
 nbformat
+plotly
