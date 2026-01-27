@@ -8,5 +8,5 @@ openpyxl
 altair<5
 scikit-learn
 datetime
-streamlit_extras
+streamlit-extras
 nbformat
