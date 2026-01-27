@@ -10,3 +10,4 @@ scikit-learn
 datetime
 streamlit-extras
 nbformat
+plotly
