@@ -213,6 +213,7 @@ df_posto = (
     .copy()
 )
 
+
 df_posto['Num. Posto'] = df_posto['Num. Posto'].astype(str).str.strip()
 
 df_posto_finalizado = df_posto[df_posto['Situação'] == 'F'].copy()
@@ -226,7 +227,7 @@ df_posto_finalizado["Hora"] = df_posto_finalizado["Hora"].apply(lambda x: f"{int
 
 df_grouped = df_posto_finalizado.groupby("Hora")["Situação"].count().reset_index()
 
-df_contagem = df_posto.groupby("Num. Posto")["Num. Picking"].count().reset_index()
+df_contagem = df_posto_finalizado.groupby("Num. Posto")["Num. Picking"].count().reset_index()
 df_contagem.columns = ["Num. Posto", "Quantidade"]
 df_contagem = df_contagem.sort_values("Quantidade", ascending=False)
 
@@ -234,12 +235,13 @@ df_contagem = df_contagem.sort_values("Quantidade", ascending=False)
 # ============================================================
 # APANHAS POR POSTO
 # ============================================================
-apanha_posto = df_apanhas[df_apanhas["Num. Posto"].notna()].copy()
+apanha_posto = df_finalizado[df_finalizado["Num. Posto"].notna()].copy()
 apanha_posto["Num. Posto"] = apanha_posto["Num. Posto"].astype(str).str.strip()
 
 apanhas_group = apanha_posto.groupby("Num. Posto")["Cod. SKU"].count().reset_index()
 apanhas_group.columns = ["Num. Posto", "Quantidade"]
 apanhas_group = apanhas_group.sort_values("Quantidade", ascending=False)
+
 
 
 # ============================================================
@@ -480,9 +482,26 @@ tabela = (
     .reset_index(name='Quantidade')
 )
 
+
+tabela_posto = (
+    df_posto_finalizado
+    .groupby(['Usuário Operador', 'Hora'])
+    .size()
+    .reset_index(name='Quantidade')
+)
+
+# Criar tabela pivotada
+tabela_pivot_posto = tabela_posto.pivot_table(
+    index='Usuário Operador',   # linhas
+    columns='Hora',             # colunas da tabela
+    values='Quantidade',        # valores
+    fill_value=0                # onde não existe valor, coloca 0
+)
+
+
 # Total apanhas por operador
 apanhas_por_operador = df_finalizado.groupby("Usuário Operador")["Usuário Operador"].value_counts()
-apanhas_por_operador = apanhas_por_operador[apanhas_por_operador > 40]
+apanhas_por_operador = apanhas_por_operador[apanhas_por_operador > 30]
 # Remover outliers
 apanhas_sem_outlier = remover_outliers_baixos(apanhas_por_operador)
 
@@ -496,6 +515,10 @@ media_apanhas_por_operador = apanhas_sem_outlier.mean()
 prod_por_hora = (
     tabela.groupby(["Usuário Operador", "Hora"])["Quantidade"].sum()
 )
+#----- produtividade hora posto -----
+prod_por_hora_posto = (
+    tabela_posto.groupby(["Usuário Operador", "Hora"])["Quantidade"].sum()
+)
 
 prod_por_hora = prod_por_hora[prod_por_hora > 10]
 prod_por_hora_sem_outlier = remover_outliers_baixos(prod_por_hora)
@@ -503,6 +526,19 @@ prod_por_hora_sem_outlier = remover_outliers_baixos(prod_por_hora)
 media_apanhas_por_hora = prod_por_hora_sem_outlier.mean()
 
 
+prod_por_hora_posto = prod_por_hora_posto[prod_por_hora_posto > 10]
+prod_por_hora_sem_outlier_posto = remover_outliers_baixos(prod_por_hora_posto)
+
+media_volumes_por_hora = prod_por_hora_sem_outlier_posto.mean()
+
+# ------ produtividade p/ volume ------
+volume_p_operador = df_posto_finalizado.groupby("Usuário Operador")["Usuário Operador"].value_counts()
+volume_p_operador = volume_p_operador[volume_p_operador > 30]
+
+volume_p_operador_outlier = remover_outliers_baixos(volume_p_operador)
+
+
+media_volume = volume_p_operador_outlier.mean()
 
 
 # Seu st.altair_chart() estava solto e sem gráfico
@@ -518,13 +554,13 @@ media_apanhas_por_hora = prod_por_hora_sem_outlier.mean()
 card_style = """
     <div style="
         background-color: #ffffff;
-        border-radius: 10px;
-        padding: 15px;
+        border-radius: 5 px;
+        padding: 5px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         text-align: center;
         border-left: 10px solid #1E88E5;
     ">
-        <h3 style="margin-bottom: 5px;">{titulo}</h3>
+        <h3 style="margin-bottom: 2px;">{titulo}</h3>
         <h1 style="color:#1E88E5; margin-top:0;">{valor}</h1>
     </div>
 """
@@ -533,7 +569,7 @@ card_style = """
 
 colunas = st.columns([2,2,2,2])
 
-with colunas[1]:
+with colunas[0]:
         
         st.markdown(
         card_style.format(
@@ -544,7 +580,7 @@ with colunas[1]:
         
         )
 
-with colunas[2]:
+with colunas[1]:
         st.markdown(
         card_style.format(
         titulo="Média de Apanhas por Operador por Hora",
@@ -553,6 +589,26 @@ with colunas[2]:
     unsafe_allow_html=True,
     
     )
+        
+with colunas[2]:
+        st.markdown(
+        card_style.format(
+        titulo="Média de Volumes por Operador",
+        valor=f"{media_volume:,.2f}"
+    ),
+    unsafe_allow_html=True,
+    
+    )
+with colunas[3]:
+        st.markdown(
+        card_style.format(
+        titulo="Média de Volumes por Operador Hora",
+        valor=f"{media_volumes_por_hora:,.2f}"
+    ),
+    unsafe_allow_html=True,
+    
+    )
+
 
 
 
@@ -617,14 +673,8 @@ with col1:
     st.plotly_chart(fig_operadores, use_container_width=True)
 
         # Agrupar por operador e hora
-    tabela = (
-        df_posto_finalizado
-        .groupby(['Usuário Operador', 'Hora'])
-        .size()
-        .reset_index(name='Quantidade')
-    )
+        # Criar tabela pivotada
 
-    # Criar tabela pivotada
     tabela_pivot = tabela.pivot_table(
         index='Usuário Operador',   # linhas
         columns='Hora',             # colunas da tabela
@@ -637,7 +687,7 @@ with col1:
     tabela_pivot = tabela_pivot.sort_values("TOTAL", ascending=False)
 
     # Jogar para o Streamlit
-    st.subheader("📊 Produtividade de Volumes por Hora e Operador")
+    st.subheader("📊 Produtividade de Apanhas por Hora e Operador")
     st.dataframe(tabela_pivot, use_container_width=True)
     
     fig_apanhas = criar_grafico_barra(
@@ -707,21 +757,14 @@ with col2:
         .reset_index(name='Quantidade')
     )
 
-    # Criar tabela pivotada
-    tabela_pivot = tabela.pivot_table(
-        index='Usuário Operador',   # linhas
-        columns='Hora',             # colunas da tabela
-        values='Quantidade',        # valores
-        fill_value=0                # onde não existe valor, coloca 0
-    )
 
     # Ordenar usuários pelo total somado
-    tabela_pivot["TOTAL"] = tabela_pivot.sum(axis=1)
-    tabela_pivot = tabela_pivot.sort_values("TOTAL", ascending=False)
+    tabela_pivot_posto["TOTAL"] = tabela_pivot_posto.sum(axis=1)
+    tabela_pivot_posto = tabela_pivot_posto.sort_values("TOTAL", ascending=False)
 
     # Jogar para o Streamlit
-    st.subheader("📊 Produtividade de Apanhas por Hora e Operador")
-    st.dataframe(tabela_pivot, use_container_width=True)
+    st.subheader("📊 Produtividade de Volumes por Hora e Operador")
+    st.dataframe(tabela_pivot_posto, use_container_width=True)
 
     fig_volumes = criar_grafico_barra(
         x_vals=list(range(len(df_contagem))),
