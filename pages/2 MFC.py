@@ -296,7 +296,7 @@ with col_center:
         labels={"HORA": "Hora do Turno"},
     )
     fig_bar.update_traces(marker_color="#1E88E5", textposition="outside")
-    st.plotly_chart(fig_bar, use_container_width=True)
+    st.plotly_chart(fig_bar, width="content")
 
 
 
@@ -311,7 +311,7 @@ with col_right:
         title=""
     )
     fig.update_traces(textposition="top center")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="content")
 
 
 st.divider(width=5)
