@@ -671,7 +671,7 @@ with col1:
         cliponaxis=False
     )
 
-    st.plotly_chart(fig_operadores, use_container_width=True)
+    st.plotly_chart(fig_operadores, width="content")
 
         # Agrupar por operador e hora
         # Criar tabela pivotada
@@ -698,7 +698,7 @@ with col1:
         titulo="Total de Apanhas Separados p/ Posto",
         cor=COR_APANHAS
     )
-    st.plotly_chart(fig_apanhas, use_container_width=True, key="apanhas_chart")
+    st.plotly_chart(fig_apanhas, width="content", key="apanhas_chart")
 
 
 
@@ -748,7 +748,7 @@ with col2:
         cliponaxis=False
     )
 
-    st.plotly_chart(fig_operadores, use_container_width=True)
+    st.plotly_chart(fig_operadores, width="content")
 
     # Agrupar por operador e hora
     tabela = (
@@ -765,7 +765,7 @@ with col2:
 
     # Jogar para o Streamlit
     st.subheader("📊 Produtividade de Volumes por Hora e Operador")
-    st.dataframe(tabela_pivot_posto, use_container_width=True)
+    st.dataframe(tabela_pivot_posto, width="content")
 
     fig_volumes = criar_grafico_barra(
         x_vals=list(range(len(df_contagem))),
@@ -774,7 +774,7 @@ with col2:
         titulo="Total de Volumes Separados p/ Posto",
         cor=COR_VOLUMES
     )
-    st.plotly_chart(fig_volumes, use_container_width=True, key="volumes_chart")
+    st.plotly_chart(fig_volumes, width="content", key="volumes_chart")
 
     
 
