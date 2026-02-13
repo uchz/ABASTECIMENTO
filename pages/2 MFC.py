@@ -203,7 +203,7 @@ df_finalizado = df_finalizado.sort_values("Hora")
 
 df_finalizado["Hora"] = df_finalizado["Hora"].apply(lambda x: f"{int(x):02d}:00" if pd.notna(x) else None)
 
-df_grouped = df_finalizado.groupby("Hora")["Situação"].count().reset_index()
+df_grouped = df_finalizado.groupby("Hora", observed=False)["Situação"].count().reset_index()
 
 # ============================================================
 # CAIXAS POR POSTO
@@ -226,7 +226,7 @@ df_posto_finalizado = df_posto_finalizado.sort_values("Hora")
 
 df_posto_finalizado["Hora"] = df_posto_finalizado["Hora"].apply(lambda x: f"{int(x):02d}:00" if pd.notna(x) else None)
 
-df_grouped = df_posto_finalizado.groupby("Hora")["Situação"].count().reset_index()
+df_grouped = df_posto_finalizado.groupby("Hora", observed=False)["Situação"].count().reset_index()
 
 df_contagem = df_posto_finalizado.groupby("Num. Posto")["Num. Picking"].count().reset_index()
 df_contagem.columns = ["Num. Posto", "Quantidade"]
@@ -478,7 +478,7 @@ def remover_outliers_baixos(series):
 # ============================================
 tabela = (
     df_finalizado
-    .groupby(['Usuário Operador', 'Hora'])
+    .groupby(['Usuário Operador', 'Hora'], observed=False)
     .size()
     .reset_index(name='Quantidade')
 )
@@ -486,7 +486,7 @@ tabela = (
 
 tabela_posto = (
     df_posto_finalizado
-    .groupby(['Usuário Operador', 'Hora'])
+    .groupby(['Usuário Operador', 'Hora'], observed=False)
     .size()
     .reset_index(name='Quantidade')
 )
@@ -514,11 +514,11 @@ media_apanhas_por_operador = apanhas_sem_outlier.mean()
 
 # --- Produtividade por hora ---
 prod_por_hora = (
-    tabela.groupby(["Usuário Operador", "Hora"])["Quantidade"].sum()
+    tabela.groupby(["Usuário Operador", "Hora"],observed=False)["Quantidade"].sum()
 )
 #----- produtividade hora posto -----
 prod_por_hora_posto = (
-    tabela_posto.groupby(["Usuário Operador", "Hora"])["Quantidade"].sum()
+    tabela_posto.groupby(["Usuário Operador", "Hora"], observed=False)["Quantidade"].sum()
 )
 
 prod_por_hora = prod_por_hora[prod_por_hora > 10]
