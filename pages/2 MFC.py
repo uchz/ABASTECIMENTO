@@ -104,7 +104,7 @@ if remover_primeiro_dia:
 # ============================================================
 
 
-df_apanhas = df.drop_duplicates(subset=['Cod. SKU', 'Num. Pedido']).copy()
+df_apanhas = df.drop_duplicates(subset=['codSKU', 'numPedido']).copy()
 
 
 # ============================================================
