@@ -82,7 +82,8 @@ hora_fim    = pd.to_datetime(hora_fim_str).time()
 df = pd.read_csv(arquivo_geral, sep=";", on_bad_lines="skip", engine="python")
 order_start = pd.read_csv(arquivo_order, sep=";", on_bad_lines="skip", engine="python")
 
-
+st.write(df.head())
+st.write(df.info())
 # ============================================================
 # AJUSTAR DATAS OPERACIONAIS
 # ============================================================
