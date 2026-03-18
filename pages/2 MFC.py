@@ -46,7 +46,7 @@ def ajustar_data_operacional(df, coluna_datahora, hora_inicio, hora_fim):
         ].copy()
 
     # Criar data operacional
-    df_filtrado["descDataInicio"] = df_filtrado[coluna_datahora].apply(
+    df_filtrado["Data Operacional"] = df_filtrado[coluna_datahora].apply(
         lambda x: x.date() if x.time() >= hora_inicio else (x - pd.Timedelta(days=1)).date()
     )
 
