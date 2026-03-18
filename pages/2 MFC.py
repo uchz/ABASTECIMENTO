@@ -86,7 +86,7 @@ order_start = pd.read_csv(arquivo_order, sep=";", on_bad_lines="skip", engine="p
 # ============================================================
 # AJUSTAR DATAS OPERACIONAIS
 # ============================================================
-df = ajustar_data_operacional(df, 'descDataInicio', hora_inicio, hora_fim)
+df = ajustar_data_operacional(df, 'descDataFinalizacao', hora_inicio, hora_fim)
 
 remover_primeiro_dia = st.sidebar.checkbox(
     "Remover o primeiro dia operacional",
