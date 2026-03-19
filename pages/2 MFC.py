@@ -79,15 +79,46 @@ hora_fim_str    = st.sidebar.selectbox("Hora Final", horas, index=5)     # defau
 hora_inicio = pd.to_datetime(hora_inicio_str).time()
 hora_fim    = pd.to_datetime(hora_fim_str).time()
 
-df = pd.read_csv(arquivo_geral, sep=";", on_bad_lines="skip", engine="python")
+df = pd.read_csv(arquivo_geral, sep=";", on_bad_lines="skip", engine="python", encoding='cp1252')
 order_start = pd.read_csv(arquivo_order, sep=";", on_bad_lines="skip", engine="python")
 
-st.write(df.head())
-st.write(df['descDataFinalizacao'].dtype)
+
+df.rename(columns={
+    'idPickingItem': 'Código',
+    'descricao': 'Descrição',
+    'situacao': 'Situação',
+    'situacaoConferencia': 'Situação Conferência',
+    'situacaoSorter': 'Situação Sorter',
+    'codSKU': 'Cod. SKU',
+    'numPicking': 'Num. Picking',
+    'numPedido': 'Num. Pedido',
+    'numCaixaPlastica': 'Num. Caixa Plástica',
+    'numEndereco': 'Num. Endereço',
+    'numPosto': 'Num. Posto',
+    'numConferencia': 'Num. Conferencia',
+    'numControle': 'Num. Controle',
+    'corLED': 'Cor LED',
+    'descDataInicio': 'Data Início',
+    'descDataFinalizacao': 'Data Finalização',
+    'descDataConferencia': 'Data Conferência',
+    'quantidade': 'Quantidade',
+    'quantidadeSeparada': 'Quantidade Separada',
+    'quantidadeConferida': 'Quantidade Conferida',
+    'usuarioOperador': 'Usuário Operador',
+    'usuarioConferencia': 'Usuário Conferência',
+    'livre1': 'Livre 1',
+    'livre2': 'Livre 2',
+    'livre3': 'Livre 3',
+    'livre4': 'Livre 4',
+    'livre5': 'Livre 5',
+    'livre6': 'Livre 6'
+
+}, inplace=True)
+
 # ============================================================
 # AJUSTAR DATAS OPERACIONAIS
 # ============================================================
-df = ajustar_data_operacional(df, 'descDataFinalizacao', hora_inicio, hora_fim)
+df = ajustar_data_operacional(df, 'Data Finalização', hora_inicio, hora_fim)
 
 remover_primeiro_dia = st.sidebar.checkbox(
     "Remover o primeiro dia operacional",
@@ -104,7 +135,7 @@ if remover_primeiro_dia:
 # ============================================================
 
 
-df_apanhas = df.drop_duplicates(subset=['codSKU', 'numPedido']).copy()
+df_apanhas = df.drop_duplicates(subset=['Cod. SKU', 'Num. Pedido']).copy()
 
 
 # ============================================================
